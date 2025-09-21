@@ -1,15 +1,29 @@
-def binary_searh(target:int , list_sorted:list, cnt:int):
-    """target -> int , list_sorted -> list , cnt -> int
+def binary_search(target:int , list_sorted:list, cnt:int):
+    """
+    target -> int , list_sorted -> list , cnt -> int
+
     target - число, которое программа должна угадать
+
     list_sorted - отсортированный список, среди которого программа должна найти загаданное число
-    cnt - число итераций"""
+
+    cnt - число итераций (попытки, которые программа потратила, чтобы отгадать число)
+
+    left - левая (нижняя) граница списка , right - правая (верхняя) граница списка
+
+    Testing binary_search:
+
+    Made some test for binary_search:
+    >> binary_search(2 , [0 , 50] , 0)
+    [2 , 4]
+    >> binary_search(1,[1,64],0)
+    [1,6]
+    >> binary_search(2,[-10,10],0)
+    [2,4]
+    """
     left , right = 0 , len(list_sorted) - 1
-    """left - левая (нижняя) граница списка , right - правая (верхняя) граница списка"""
     while left <= right :
         mid = (left + right ) // 2
-        """mid - серединный барьер, с которым мы сравниваем target"""
         cnt += 1
-        """для каждого mid мы совершаем 1 итерацию поиска (попытка)"""
         if list_sorted[mid] == target:
             return [target, cnt]
         elif list_sorted[mid] < target:
