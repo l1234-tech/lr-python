@@ -25,5 +25,3 @@ def gen_bin_tree(height:int , root:int):
                 tree.append(right_leaf(i))
         return tree
 print(gen_bin_tree(5 , 18))
-
-
