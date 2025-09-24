@@ -1,4 +1,4 @@
-def binary_search(target:int , list_sorted:list, cnt:int):
+def binary_search(target:int , list_sorted:list, cnt:int) -> str:
     """
     target -> int , list_sorted -> list , cnt -> int
 
@@ -31,3 +31,4 @@ def binary_search(target:int , list_sorted:list, cnt:int):
         else:
             right = mid - 1
     return [None , cnt]
+
