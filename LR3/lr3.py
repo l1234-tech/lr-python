@@ -46,11 +46,21 @@ def gen_bin_tree(height:int , root:int) -> list:
 
     if type(height) in (str, list):
         return "Некорректное значение height (должно быть натуральное число или 0)"
+
+    elif type(root) in (str, list):
+        return "Некорректное значение root (должно быть натуральное число или 0)"
+
     else:
         if height < 0 or int(height) != height:
             return "Некорректное значение height (должно быть натуральное число или 0)"
+
+        elif root < 0 or int(root) != root:
+            return "Некорректное значение root (должно быть натуральное число или 0)"
+
         elif height == 0:
             return [root]
+
         else:
             return [root] + gen_bin_tree(height - 1 , left_leaf(root)) +  gen_bin_tree(height - 1, right_leaf(root))
+
 print(gen_bin_tree(5 , 18))
