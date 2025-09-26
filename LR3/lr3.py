@@ -44,10 +44,13 @@ def gen_bin_tree(height:int , root:int) -> list:
     def right_leaf(root):
         return (root + 8) * 2
 
-    if height < 0 or int(height) != height or height == str(height):
+    if type(height) in (str, list):
         return "Некорректное значение height (должно быть натуральное число или 0)"
-    if height == 0:
-        return [root]
     else:
-        return [root] + gen_bin_tree(height - 1 , left_leaf(root)) +  gen_bin_tree(height - 1, right_leaf(root))
+        if height < 0 or int(height) != height:
+            return "Некорректное значение height (должно быть натуральное число или 0)"
+        elif height == 0:
+            return [root]
+        else:
+            return [root] + gen_bin_tree(height - 1 , left_leaf(root)) +  gen_bin_tree(height - 1, right_leaf(root))
 print(gen_bin_tree(5 , 18))
