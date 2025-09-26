@@ -22,5 +22,6 @@ class TestMySolution(unittest.TestCase):
 
         self.assertEqual(binary_search(1234, list(range(123, 1234567)), 0), [1234, 19])
         # угадывание числа 1234 из диапозона 123 - 1234567
+
 if __name__ == '__main__':
     unittest.main()
