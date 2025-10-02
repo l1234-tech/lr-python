@@ -1,66 +1,30 @@
-def gen_bin_tree(height:int , root:int) -> list:
-    """
-    Данная функция строит "бинарное дерево" по двум вводным: выосте и корню дерева
-    Также в данной функции есть две подфункции: left_lean и right_lean
+from lr3 import gen_bin_tree
+import unittest
+class TestMySolution(unittest.TestCase):
+    def test_simple(self):
+        self.assertEqual(gen_bin_tree(0, 18), [18])
+        # строим бинарное дерево, где высота 0, то есть должно вывести просто root
 
-    left_lean - функция, преобразовывающая левую "ветку" дерева по заданной функции
-    right_lean - функция, преобразовывающая левую "ветку" дерева по заданной функции
+        self.assertEqual(gen_bin_tree(-1, 18), "Некорректное значение height (должно быть натуральное число или 0)")
+        # строим бинарное дерево, где высота отрицательна
 
-    Функция реализована рекурсионным методом, то есть она сторит последующий ответ по уже высчитанному ответу:
+        self.assertEqual(gen_bin_tree(1, 18), [18, 30, 52])
+        # строим бинарное дерево, где высота больше нуля
 
-    Example:
-    >> gen_bin_tree(0,10):
-    [18]
+        self.assertEqual(gen_bin_tree(1.1, 18), "Некорректное значение height (должно быть натуральное число или 0)")
+        # строим бинарное дерево, где высота нецелое число
 
-    Далее функция строит вычисления для height = 1 на основе значения gen_bin_tree(1,10):
+        self.assertEqual(gen_bin_tree('Привет', 18), "Некорректное значение height (должно быть натуральное число или 0)")
+        # строим бинарное дерево, где высота имеет тип str
 
-    >> gen_bin_tree(1,10):
-    [10,6,36]
+        self.assertEqual(gen_bin_tree(1, -10), "Некорректное значение root (должно быть неотрицательное число)")
+        # строим бинарное дерево, где root меньше нуля
 
-    Arguments:
-    height (int) - это высота "бинорного дерева"
-    root (int) - это корень "бинарного дерева" , то есть первое число, по которому строится дерево
+        self.assertEqual(gen_bin_tree(1, "Привет"), "Некорректное значение root (должно быть неотрицательное число)")
+        # строим бинарное дерево, где root имеет тип str
 
-    Returns:
-        list и str , list - вывод "бинарного дерева", когда height >= 0
-        str - ошибка ввода высоты
+        self.assertEqual(gen_bin_tree(1, [12]), "Некорректное значение root (должно быть неотрицательное число)")
+        # строим бинарное дерево, где root имеет тип list
 
-    Testing gen_bin_tree:
-
-    Made some test for gen_bin_tree:
-        >> gen_bin_tree(1,11):
-        [11, 9, 38]
-
-        >> gen_bin_tree(3,13):
-        [13, 15, 21, 39, 58, 46, 114, 108, 42, 102, 282, 220, 100, 276, 216]
-
-        >> gen_bin_tree(2,100):
-        [100, 276, 804, 568, 216, 624, 448]
-    """
-
-    def left_leaf(root):
-        return (root - 8) * 3
-
-    def right_leaf(root):
-        return (root + 8) * 2
-
-    if type(height) in (str, list):
-        return "Некорректное значение height (должно быть натуральное число или 0)"
-
-    elif type(root) in (str, list):
-        return "Некорректное значение root (должно быть натуральное число или 0)"
-
-    else:
-        if height < 0 or int(height) != height:
-            return "Некорректное значение height (должно быть натуральное число или 0)"
-
-        elif root < 0:
-            return "Некорректное значение root (должно быть неотрицательное число)"
-
-        elif height == 0:
-            return [root]
-
-        else:
-            return [root] +  gen_bin_tree(height - 1 , left_leaf(root)) +  gen_bin_tree(height - 1, right_leaf(root))
-
-print(gen_bin_tree(5 , 18))
+if __name__ == '__main__':
+    unittest.main()
