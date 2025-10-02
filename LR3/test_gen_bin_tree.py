@@ -24,7 +24,8 @@ class TestMySolution(unittest.TestCase):
         # строим бинарное дерево, где root меньше нуля
 
         self.assertEqual(gen_bin_tree(1, "Привет"), "Некорректное значение root (должно быть натуральное число или 0)")
-        # строим бинарное дерево, где root имеет тип root
+        # строим бинарное дерево, где root имеет тип str
         
 if __name__ == '__main__':
     unittest.main()
+
