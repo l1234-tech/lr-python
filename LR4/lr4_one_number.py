@@ -1,6 +1,7 @@
 import timeit
 import matplotlib.pyplot as plt
 import random
+from functools import lru_cache
 
 
 def fact_recursive(n: int) -> int:
@@ -9,6 +10,7 @@ def fact_recursive(n: int) -> int:
         return 1
     return n * fact_recursive(n - 1)
 
+@lru_cache()
 
 def fact_iterative(n: int) -> int:
     """Нерекурсивный факториал"""
@@ -49,3 +51,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
