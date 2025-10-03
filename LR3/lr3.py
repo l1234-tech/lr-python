@@ -1,3 +1,5 @@
+from pprint import pprint
+
 def gen_bin_tree(height:int , root:int) -> list:
     """
     Данная функция строит "бинарное дерево" по двум вводным: выосте и корню дерева
@@ -10,12 +12,12 @@ def gen_bin_tree(height:int , root:int) -> list:
 
     Example:
     >> gen_bin_tree(0,10):
-    [18]
+    {10}
 
     Далее функция строит вычисления для height = 1 на основе значения gen_bin_tree(1,10):
 
     >> gen_bin_tree(1,10):
-    [10,6,36]
+    {10: [{6}, {36}]}
 
     Arguments:
     height (int) - это высота "бинорного дерева"
@@ -29,13 +31,16 @@ def gen_bin_tree(height:int , root:int) -> list:
 
     Made some test for gen_bin_tree:
         >> gen_bin_tree(1,11):
-        [11, 9, 38]
+        {11: [{9}, {38}]}
 
         >> gen_bin_tree(3,13):
-        [13, 15, 21, 39, 58, 46, 114, 108, 42, 102, 282, 220, 100, 276, 216]
+        {13: [{15: [{21: [{39}, {58}]}, {46: [{114}, {108}]}]},
+      {42: [{102: [{282}, {220}]}, {100: [{276}, {216}]}]}]}
 
         >> gen_bin_tree(2,100):
-        [100, 276, 804, 568, 216, 624, 448]
+        {100: [{276: [{804}, {568}]}, {216: [{624}, {448}]}]}
+
+    (pprint библиотека для более красивого и читабельного вывода)
     """
 
     def left_leaf(root):
@@ -58,9 +63,10 @@ def gen_bin_tree(height:int , root:int) -> list:
             return "Некорректное значение root (должно быть неотрицательное число)"
 
         elif height == 0:
-            return [root]
+            return {root}
 
         else:
-            return [root] +  gen_bin_tree(height - 1 , left_leaf(root)) +  gen_bin_tree(height - 1, right_leaf(root))
+            res = {root:  [gen_bin_tree(height - 1 , left_leaf(root)),  gen_bin_tree(height - 1, right_leaf(root))]}
+            return res
 
-print(gen_bin_tree(5 , 18))
+pprint(gen_bin_tree(5, 18))
