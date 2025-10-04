@@ -24,7 +24,7 @@ def gen_bin_tree(height:int , root:int) -> list:
     root (int) - это корень "бинарного дерева" , то есть первое число, по которому строится дерево
 
     Returns:
-        list и str , list - вывод "бинарного дерева", когда height >= 0
+        dict и str , dict - вывод "бинарного дерева", когда height >= 0
         str - ошибка ввода высоты
 
     Testing gen_bin_tree:
@@ -70,3 +70,4 @@ def gen_bin_tree(height:int , root:int) -> list:
             return res
 
 pprint(gen_bin_tree(5, 18))
+
