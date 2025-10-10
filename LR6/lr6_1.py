@@ -1,7 +1,6 @@
 import timeit
 import matplotlib.pyplot as plt
 import random
-from functools import lru_cache
 
 def build_tree_recursive(root: int, height: int) -> dict:
     """
@@ -208,20 +207,21 @@ def benchmark(func, height, root, number=1, repeat=5):
 def main():
     # фиксированный набор данных
     random.seed(42)
-    test_data = list(range(1, 7, 1))
+    test_data = list(range(1, 10, 1))
+    # перебираем значения высоты от 1 до 9
 
     res_recursive = []
     res_iterative = []
     root = 18
 
     for height in test_data:
-        res_recursive.append(benchmark(build_tree_recursive, height , root, number=1000, repeat=10))
-        res_iterative.append(benchmark(build_tree_iteractive, height , root, number=1000, repeat=10))
+        res_recursive.append(benchmark(build_tree_recursive, height , root, number=500, repeat=height))
+        res_iterative.append(benchmark(build_tree_iteractive, height , root, number=500, repeat=height))
 
     # Визуализация
     plt.plot(test_data, res_recursive, label="Рекурсивный")
     plt.plot(test_data, res_iterative, label="Итеративный")
-    plt.xlabel("height")
+    plt.xlabel("высота")
     plt.ylabel("Время (сек)")
     plt.title("Сравнение рекурсивного и итеративного 'бинарного дерева'")
     plt.legend()
