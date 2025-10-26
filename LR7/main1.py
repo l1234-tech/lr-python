@@ -54,8 +54,9 @@ def get_currencies(currency_codes:list , url:str = 'https://www.cbr-xml-daily.ru
         # специально понимаем ошибку, чтобы понять что не так
         # return None
 
-# if __name__ == '__main__':
-#     currency_list = ['USD', 'EUR', 'GBP' , 'JPY']
-#     currency_data = get_currencies(currency_list)
-#     res = get_currencies(currency_list)
-#     print(res)
+if __name__ == '__main__':
+    currency_list = ['USD', 'EUR', 'GBP' , 'JPY']
+    currency_data = get_currencies(currency_list)
+    res = get_currencies(currency_list)
+
+    print(res)
