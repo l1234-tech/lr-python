@@ -43,13 +43,13 @@ class TestStreamWrite(unittest.TestCase):
 
   def broken_trace(self):
       broken_stream = io.StringIO()
-      broken_stream.write('Broken_Info')
+      broken_stream.write('error_phrase_regex')
       # создали заведомо сломанный поток, который заменяет изначальный, т.е. если в main был бы некорректный поток, то на тесте
       # эта функция перехватила бы этот поток и запутила тест, который выдал бы исключение
       with self.assertRaises(requests.exceptions.RequestException):
           get_currencies(['USD'] , url = "https://", handle = broken_stream)
       #     здесь мы проверяем неверный поток
-      self.assertIn("Ошибка при запросе API", broken_stream.read())
+      self.assertRegex("Ошибка при запросе API", broken_stream.read())
 
 
   def test_writing_stream(self):
@@ -63,6 +63,7 @@ class TestStreamWrite(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
 
 
 
