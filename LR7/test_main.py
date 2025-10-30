@@ -1,8 +1,8 @@
 import io
 import unittest
 import requests
-from main1 import trace
-from main1 import get_currencies
+from main import trace
+from main import get_currencies
 MAX_R_VALUE = 1000
 
 class TestGetCurrencies(unittest.TestCase):
@@ -58,3 +58,4 @@ class TestStreamWrite(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
