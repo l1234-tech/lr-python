@@ -1,8 +1,8 @@
 import io
 import unittest
 import requests
-from main import trace
-from main import get_currencies
+from main1 import trace
+from main1 import get_currencies
 MAX_R_VALUE = 1000
 
 class TestGetCurrencies(unittest.TestCase):
@@ -28,11 +28,6 @@ class TestGetCurrencies(unittest.TestCase):
         with self.assertRaises(requests.exceptions.RequestException):
             currency_data = get_currencies(currency_list, url="https://")
 
-# найти каким образом проверить содержание фразы erroe_phase_regex в потоке вывода
-# Дополнить тест , который должен проверять что в потоке, куда пишет функция get_currecies содержится error_phrase_regex
-# ля использования ssertStartsWith или assertRegex
-
-
 class TestStreamWrite(unittest.TestCase):
 
 
@@ -40,8 +35,7 @@ class TestStreamWrite(unittest.TestCase):
     self.nonstandardstream = io.StringIO()
     self.trace = trace(get_currencies, handle=self.nonstandardstream)
 
-
-  def broken_trace(self):
+  def test_broken_trace(self):
       broken_stream = io.StringIO()
       broken_stream.write('error_phrase_regex')
       # создали заведомо сломанный поток, который заменяет изначальный, т.е. если в main был бы некорректный поток, то на тесте
@@ -49,8 +43,9 @@ class TestStreamWrite(unittest.TestCase):
       with self.assertRaises(requests.exceptions.RequestException):
           get_currencies(['USD'] , url = "https://", handle = broken_stream)
       #     здесь мы проверяем неверный поток
-      self.assertRegex("Ошибка при запросе API", broken_stream.read())
-
+      broken_regex = broken_stream.getvalue()
+      # здесь получаем то, что содержит в себе сломанный поток
+      self.assertRegex(broken_regex, "Ошибка при запросе API")
 
   def test_writing_stream(self):
     with self.assertRaises(requests.exceptions.RequestException):
@@ -63,7 +58,3 @@ class TestStreamWrite(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-
-
-
