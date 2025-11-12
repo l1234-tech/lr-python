@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>{{ title }} | Курсы валют</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Курсы валют</h1>
+
+        <nav class="mb-4">
+            <ul class="nav nav-pills">
+                {% for item in navigation %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ item.href }}">{{ item.caption }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
+
+        <!-- Форма выбора валют -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Выберите валюты для отслеживания</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/currencies">
+                    <div class="row">
+                        {% for currency in available_currencies %}
+                            <div class="col-md-3 col-sm-4 col-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox"
+                                           name="currencies" value="{{ currency }}"
+                                           id="currency_{{ currency }}"
+                                           {% if currency in selected_currencies %}checked{% endif %}>
+                                    <label class="form-check-label" for="currency_{{ currency }}">
+                                        {{ currency }}
+                                    </label>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Обновить список</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Отображение выбранных валют -->
+        <div class="row">
+            {% if currencies %}
+                {% for currency in currencies %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">{{ currency.name_curr }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">{{ currency.name }}</h6>
+                                <p class="card-text">
+                                    <strong>Текущий курс:</strong> {{ "%.4f"|format(currency.price) }} руб.<br>
+                                    <strong>Предыдущий:</strong> {{ "%.4f"|format(currency.previous) }} руб.<br>
+                                    <strong>Изменение:</strong>
+                                    {% set change = currency.price - currency.previous %}
+                                    {% if change > 0 %}
+                                        <span class="text-success">+{{ "%.4f"|format(change) }}</span>
+                                    {% elif change < 0 %}
+                                        <span class="text-danger">{{ "%.4f"|format(change) }}</span>
+                                    {% else %}
+                                        <span class="text-muted">{{ "%.4f"|format(change) }}</span>
+                                    {% endif %}
+                                    <br>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        Не удалось загрузить данные о валютах или не выбраны валюты для отслеживания
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+</body>
+</html>
