@@ -1,6 +1,5 @@
-class Author():
-    def __init__(self,name:str, group:str = "P3122"):
-        # конструктор
+class Author:
+    def __init__(self, name: str, group: str = "P3122"):
         self.__name = name
         self.__group = group
 
@@ -21,10 +20,14 @@ class Author():
 
     @group.setter
     def group(self, group):
-        if len(group) == 5 and type(group) is str:
+        if len(group) == 5 and isinstance(group, str):
             self.__group = group
         else:
             raise ValueError('Группа должна быть 5 символов длиной')
-    @property
-    def group(self):
-        return self.__group
+
+    def to_dict(self):
+        """Преобразовать объект в словарь для JSON"""
+        return {
+            'name': self.__name,
+            'group': self.__group
+        }
