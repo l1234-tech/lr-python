@@ -50,7 +50,6 @@
     </style>
 </head>
 <body>
-    <!-- Навигация -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="/">CurrenciesListApp</a>
@@ -74,12 +73,10 @@
         </div>
     </nav>
 
-    <!-- Основной контент -->
     <div class="container main-container py-4">
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Футер - УПРОЩЕННЫЙ -->
     <footer class="footer">
         <div class="container text-center">
             <p>CurrenciesListApp © 2025 | Группа: {{ author.group if author else 'P3122' }}</p>
@@ -89,4 +86,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% block scripts %}{% endblock %}
 </body>
+
 </html>
