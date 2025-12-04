@@ -1,4 +1,3 @@
-# models/currency.py
 import requests
 
 class CurenciesList:
@@ -65,4 +64,5 @@ class CurenciesList:
             'price': self.__price,
             'name': self.__full_name,
             'previous': self.__previous
+
         }
