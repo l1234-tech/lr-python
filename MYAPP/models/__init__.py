@@ -1,5 +1,4 @@
 from .author import Author
-
 from .user import User
-
-from .CurrenciesList import CurenciesList , CurrencyParser
+from .currency import CurenciesList
+from .currency_parser import CurrencyParser
