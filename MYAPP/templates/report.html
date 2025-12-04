@@ -1,0 +1,280 @@
+<!-- templates/report.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3><i class="bi bi-file-text"></i> Отчет 1 - Описание проекта CurrenciesListApp</h3>
+            </div>
+            <div class="card-body">
+                <h4 class="border-bottom pb-2">1. Цель работы</h4>
+                <p>
+                    Целью данной лабораторной работы было создание веб-приложения для отслеживания курсов валют
+                    с использованием архитектуры MVC (Model-View-Controller). Основные задачи:
+                </p>
+                <ul>
+                    <li>Реализация моделей данных (User, Currency, Author)</li>
+                    <li>Создание контроллеров для обработки HTTP-запросов</li>
+                    <li>Разработка HTML-шаблонов с использованием Jinja2</li>
+                    <li>Интеграция с API Центрального Банка России</li>
+                    <li>Реализация системы подписок пользователей на валюты</li>
+                    <li>Создание интерактивных графиков изменения курсов</li>
+                </ul>
+
+                <h4 class="border-bottom pb-2 mt-4">2. Описание предметной области</h4>
+                <h5>Модели данных:</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card border-success mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h6><i class="bi bi-person"></i> User (Пользователь)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Свойства:</strong></p>
+                                <ul>
+                                    <li>id - уникальный идентификатор</li>
+                                    <li>name - имя пользователя</li>
+                                    <li>subscriptions - список подписок на валюты</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-primary mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h6><i class="bi bi-currency-dollar"></i> Currency (Валюта)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Свойства:</strong></p>
+                                <ul>
+                                    <li>name_curr - код валюты (USD, EUR и т.д.)</li>
+                                    <li>id - ID валюты в системе ЦБ</li>
+                                    <li>name - полное название</li>
+                                    <li>price - текущий курс</li>
+                                    <li>previous - предыдущий курс</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-warning mb-3">
+                            <div class="card-header bg-warning text-dark">
+                                <h6><i class="bi bi-person-badge"></i> Author (Автор)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Свойства:</strong></p>
+                                <ul>
+                                    <li>name - имя автора</li>
+                                    <li>group - учебная группа</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h5>Связи между моделями:</h5>
+                <div class="text-center mb-4">
+                    <div class="d-inline-block p-4 border rounded bg-light">
+                        User (1) -- (n) Currency<br>
+                        <small class="text-muted">Один пользователь может быть подписан на несколько валют</small>
+                    </div>
+                </div>
+
+                <h4 class="border-bottom pb-2 mt-4">3. Структура проекта</h4>
+                <pre class="bg-dark text-white p-3 rounded">
+myapp/
+├── models/                    # Модели данных
+│   ├── __init__.py
+│   ├── author.py             # Модель Author
+│   ├── user.py               # Модель User
+│   ├── currency.py           # Модель Currency
+│   └── currency_parser.py    # Парсер API ЦБ
+├── controllers/              # Контроллеры
+│   ├── __init__.py
+│   ├── databasecontroller.py # Работа с БД
+│   ├── currencycontroller.py # Логика валют
+│   ├── usercontroller.py     # Логика пользователей
+│   └── pages.py             # Рендеринг страниц
+├── templates/                # HTML шаблоны
+│   ├── base.html            # Базовый шаблон
+│   ├── index.html           # Главная страница
+│   ├── author.html          # Об авторе
+│   ├── users.html           # Пользователи
+│   ├── user.html            # Конкретный пользователь
+│   ├── currencies.html      # Валюты
+│   ├── report.html          # Отчет 1
+│   └── report2.html         # Отчет 2
+├── static/                   # Статические файлы
+├── myapp.py                 # Главный файл приложения
+└── currencies.db            # База данных SQLite
+                </pre>
+
+                <h4 class="border-bottom pb-2 mt-4">4. Реализация маршрутов</h4>
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Маршрут</th>
+                            <th>Описание</th>
+                            <th>Шаблон</th>
+                            <th>Метод</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>/</td>
+                            <td>Главная страница</td>
+                            <td>index.html</td>
+                            <td>GET</td>
+                        </tr>
+                        <tr>
+                            <td>/author</td>
+                            <td>Информация об авторе</td>
+                            <td>author.html</td>
+                            <td>GET</td>
+                        </tr>
+                        <tr>
+                            <td>/users</td>
+                            <td>Список пользователей</td>
+                            <td>users.html</td>
+                            <td>GET</td>
+                        </tr>
+                        <tr>
+                            <td>/user?id=...</td>
+                            <td>Профиль пользователя</td>
+                            <td>user.html</td>
+                            <td>GET</td>
+                        </tr>
+                        <tr>
+                            <td>/currencies</td>
+                            <td>Курсы валют</td>
+                            <td>currencies.html</td>
+                            <td>GET</td>
+                        </tr>
+                        <tr>
+                            <td>/user/subscription</td>
+                            <td>Управление подписками</td>
+                            <td>-</td>
+                            <td>POST</td>
+                        </tr>
+                        <tr>
+                            <td>/currencies/add</td>
+                            <td>Добавление валюты</td>
+                            <td>-</td>
+                            <td>POST</td>
+                        </tr>
+                        <tr>
+                            <td>/currencies/remove</td>
+                            <td>Удаление валюты</td>
+                            <td>-</td>
+                            <td>POST</td>
+                        </tr>
+                        <tr>
+                            <td>/report</td>
+                            <td>Отчет 1</td>
+                            <td>report.html</td>
+                            <td>GET</td>
+                        </tr>
+                        <tr>
+                            <td>/report2</td>
+                            <td>Отчет 2</td>
+                            <td>report2.html</td>
+                            <td>GET</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4 class="border-bottom pb-2 mt-4">5. Реализация MVC</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card border-success h-100">
+                            <div class="card-header bg-success text-white">
+                                <h5><i class="bi bi-box"></i> Models</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Реализация:</strong></p>
+                                <ul>
+                                    <li>Геттеры и сеттеры с валидацией</li>
+                                    <li>Инкапсуляция данных</li>
+                                    <li>Связи между сущностями</li>
+                                    <li>Бизнес-логика в методах</li>
+                                </ul>
+                                <p><strong>Пример:</strong></p>
+                                <pre><code>@property
+def name(self):
+    return self.__name
+
+@name.setter
+def name(self, value):
+    if len(value) >= 1:
+        self.__name = value
+    else:
+        raise ValueError('Имя не может быть пустым')</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-primary h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h5><i class="bi bi-controller"></i> Controllers</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Реализация:</strong></p>
+                                <ul>
+                                    <li>Обработка HTTP-запросов</li>
+                                    <li>Взаимодействие с моделями</li>
+                                    <li>Подготовка данных для представлений</li>
+                                    <li>Маршрутизация</li>
+                                </ul>
+                                <p><strong>Пример:</strong></p>
+                                <pre><code>def do_GET(self):
+    parsed_path = urlparse(self.path)
+    if parsed_path.path == '/':
+        # Главная страница
+        template = env.get_template("index.html")
+        result = template.render(...)
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html')
+        self.end_headers()
+        self.wfile.write(bytes(result, "utf-8"))</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-warning h-100">
+                            <div class="card-header bg-warning text-dark">
+                                <h5><i class="bi bi-eye"></i> Views</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Реализация:</strong></p>
+                                <ul>
+                                    <li>HTML шаблоны с Jinja2</li>
+                                    <li>Наследование шаблонов</li>
+                                    <li>Циклы и условия</li>
+                                    <li>Интерактивные элементы</li>
+                                </ul>
+                                <p><strong>Пример:</strong></p>
+                                <pre><code>{% raw %}{% extends "base.html" %}
+{% block content %}
+  {% for currency in currencies %}
+    &lt;div&gt;{{ currency.name }}: {{ currency.price }}&lt;/div&gt;
+  {% endfor %}
+{% endblock %}{% endraw %}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer text-center">
+                <a href="/" class="btn btn-primary">
+                    <i class="bi bi-house"></i> На главную
+                </a>
+                <a href="/report2" class="btn btn-secondary">
+                    <i class="bi bi-arrow-right"></i> К отчету 2
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
