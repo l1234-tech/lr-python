@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                О приложении
+            </div>
+            <div class="card-body">
+                <h4>CurrenciesListApp</h4>
+                <p>Веб-приложение для отслеживания курсов валют в реальном времени на основе данных Центрального Банка России.</p>
+
+                <h5 class="mt-4">Основные возможности:</h5>
+                <ul>
+                    <li>Просмотр текущих курсов валют</li>
+                    <li>Управление подписками пользователей</li>
+                    <li>История курсов за 90 дней</li>
+                    <li>Интерактивные графики изменения курсов</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Основные валюты
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Код</th>
+                                <th>Название</th>
+                                <th>Курс</th>
+                                <th>Изменение</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for currency in currencies %}
+                            {% set change = currency.price - currency.previous %}
+                            <tr>
+                                <td><strong>{{ currency.name_curr }}</strong></td>
+                                <td>{{ currency.name }}</td>
+                                <td>{{ "%.4f"|format(currency.price) }} руб.</td>
+                                <td>
+                                    {% if change > 0 %}
+                                    <span class="change-positive">+{{ "%.4f"|format(change) }}</span>
+                                    {% elif change < 0 %}
+                                    <span class="change-negative">{{ "%.4f"|format(change) }}</span>
+                                    {% else %}
+                                    <span class="text-muted">0.0000</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                Информация
+            </div>
+            <div class="card-body">
+                <h5>{{ author.name if author else 'Автор' }}</h5>
+                <p><strong>Группа:</strong> {{ group if group else 'P3122' }}</p>
+                <p><strong>Версия:</strong> 1.0</p>
+                <p><strong>Обновление:</strong> Реальное время</p>
+
+                <div class="mt-4">
+                    <a href="/currencies" class="btn btn-primary w-100 mb-2">Курсы валют</a>
+                    <a href="/users" class="btn btn-secondary w-100 mb-2">Пользователи</a>
+                    <a href="/report" class="btn btn-outline-primary w-100">Отчеты</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                Быстрый доступ
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for item in navigation %}
+                    <li class="list-group-item">
+                        <a href="{{ item.href }}" class="text-decoration-none">{{ item.caption }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
