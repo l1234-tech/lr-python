@@ -1,6 +1,5 @@
 class User():
     def __init__(self,id:int, name:str = 'Andrew'):
-        # конструктор
         self.__id = id
         self.__name = name
 
