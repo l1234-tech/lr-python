@@ -1,4 +1,3 @@
-# models/currency_parser.py
 import requests
 from datetime import datetime, timedelta
 import json
@@ -11,7 +10,7 @@ class CurrencyParser:
         self._currencies_data = {}
         self._available_currencies_cache = None
         self._last_update_time = 0
-        self._cache_duration = 300  # 5 минут кэширования
+        self._cache_duration = 300
 
     def get_all_available_currencies(self):
         """Получает список всех доступных валют"""
@@ -74,7 +73,6 @@ class CurrencyParser:
                 except Exception:
                     continue
 
-            # Используем len() вместо .length
             if len(history) < 7:
                 print(f"Мало данных для {currency_code}, создаем фиктивные данные")
                 history = self._generate_mock_history(currency_code, days)
@@ -203,4 +201,5 @@ class CurrencyParser:
     def get_currency_info(self, currency_code: str):
         """Получает информацию о конкретной валюте"""
         currencies = self.get_currencies([currency_code])
+
         return currencies.get(currency_code)
