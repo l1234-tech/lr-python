@@ -65,12 +65,12 @@
                 {% for currency in all_currencies %}
                     {% if not currency.is_subscribed %}
                         <option value="{{ currency.id }}" data-subscribed="false">
-                            ✅ {{ currency.char_code }} - {{ currency.name }}
+                             {{ currency.char_code }} - {{ currency.name }}
                             ({{ "%.2f"|format(currency.value) }} ₽ за {{ currency.nominal }} ед.)
                         </option>
                     {% else %}
                         <option value="{{ currency.id }}" disabled style="color: #999;" data-subscribed="true">
-                            ⭐ {{ currency.char_code }} - {{ currency.name }}
+                             {{ currency.char_code }} - {{ currency.name }}
                             ({{ "%.2f"|format(currency.value) }} ₽ за {{ currency.nominal }} ед.) - УЖЕ ПОДПИСАН
                         </option>
                     {% endif %}
@@ -87,8 +87,8 @@
     <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin-top: 15px;">
         <h4>Статус валют:</h4>
         <ul style="margin: 0; padding-left: 20px;">
-            <li><span style="color: #28a745;">✅</span> - Доступна для подписки</li>
-            <li><span style="color: #ffc107;">⭐</span> - Уже подписаны</li>
+            <li><span style="color: #28a745;"></span> - Доступна для подписки</li>
+            <li><span style="color: #ffc107;"></span> - Уже подписаны</li>
         </ul>
     </div>
 {% else %}
@@ -108,7 +108,6 @@ function validateCurrencySelection() {
         return false;
     }
 
-    // Проверяем, не подписан ли уже на эту валюту
     const isSubscribed = selectedOption.getAttribute('data-subscribed') === 'true';
     if (isSubscribed) {
         alert('Вы уже подписаны на эту валюту!');
@@ -119,7 +118,6 @@ function validateCurrencySelection() {
     return confirm(`Вы уверены, что хотите подписаться на ${currencyName}?`);
 }
 
-// Обновляем доступность кнопки при изменении выбора
 document.getElementById('currency_select').addEventListener('change', function() {
     const selectedOption = this.options[this.selectedIndex];
     const isSubscribed = selectedOption.getAttribute('data-subscribed') === 'true';
@@ -144,7 +142,6 @@ document.getElementById('currency_select').addEventListener('change', function()
         <a href="/debug/db" class="btn" style="background: #6c757d;">Отладка БД</a>
         <a href="/currencies" class="btn">Все валюты</a>
     </div>
-<!-- В конце профиля добавьте -->
 <div style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9em;">
     <h4>Отладочная информация:</h4>
     <ul>
@@ -161,7 +158,6 @@ document.getElementById('currency_select').addEventListener('change', function()
 <script>
     document.getElementById('current-time').textContent = new Date().toLocaleTimeString();
 
-    // Автообновление каждые 5 секунд
     setTimeout(function() {
         location.reload();
     }, 5000);
