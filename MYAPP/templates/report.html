@@ -14,12 +14,13 @@
                     с использованием архитектуры MVC (Model-View-Controller). Основные задачи:
                 </p>
                 <ul>
-                    <li>Реализация моделей данных (User, Currency, Author)</li>
+                    <li>Реализация моделей данных (User, Currency, Author) с геттерами и сеттерами</li>
                     <li>Создание контроллеров для обработки HTTP-запросов</li>
                     <li>Разработка HTML-шаблонов с использованием Jinja2</li>
-                    <li>Интеграция с API Центрального Банка России</li>
+                    <li>Получать данные о курсах валют через функцию get_currencies и отображать их пользователям</li>
                     <li>Реализация системы подписок пользователей на валюты</li>
                     <li>Создание интерактивных графиков изменения курсов</li>
+                    <li>Научиться создавать тесты для моделей и серверной логики (подробно описано в отчете 2)</li>
                 </ul>
 
                 <h4 class="border-bottom pb-2 mt-4">2. Описание предметной области</h4>
@@ -49,7 +50,7 @@
                                 <p><strong>Свойства:</strong></p>
                                 <ul>
                                     <li>name_curr - код валюты (USD, EUR и т.д.)</li>
-                                    <li>id - ID валюты в системе ЦБ</li>
+                                    <li>currency_id - ID валюты в системе ЦБ</li>
                                     <li>name - полное название</li>
                                     <li>price - текущий курс</li>
                                     <li>previous - предыдущий курс</li>
@@ -111,7 +112,7 @@ myapp/
 
                 <h4 class="border-bottom pb-2 mt-4">4. Маршруты приложения</h4>
                 <table class="table table-bordered">
-                    <thead class="table-dark">
+                    <thead class="dark">
                         <tr>
                             <th>Маршрут</th>
                             <th>Описание</th>
@@ -189,7 +190,7 @@ myapp/
                     </tbody>
                 </table>
 
-                <h4 class="border-bottom pb-2 mt-4">5. Применение архитектуры MVC</h4>
+                <h4 class="border-bottom pb-2 mt-4">5. Применение архитектуры MVC - разделение ответственности</h4>
                 <div class="row">
                     <div class="col-md-4">
                         <div class="card border-success h-100">
@@ -236,6 +237,7 @@ def name(self, value):
                                     <li>databasecontroller.py - работа с SQLite</li>
                                     <li>currencycontroller.py - бизнес-логика валют</li>
                                     <li>pages.py - рендеринг страниц через Jinja2</li>
+                                    <li>usercontroller.py - работа с подписками</li>
                                 </ul>
                             </div>
                         </div>
@@ -270,38 +272,66 @@ env = Environment(
                 <div class="card mb-3">
                     <div class="card-body">
                         <p><strong>Функция get_currencies для получения курсов:</strong></p>
-                        <pre><code>def get_currencies(self, currency_codes: list):
-    try:
-        response = requests.get(self.api_url, timeout=5)
-        response.raise_for_status()
-        data = response.json()
+                        <pre><code> def get_currencies(self, currency_codes: list):
+        """Получает данные для списка валют"""
+        from .currency import CurenciesList
 
-        currencies = {}
-        if "Valute" in data:
-            for code in currency_codes:
-                if code in data["Valute"]:
-                    currency_info = data["Valute"][code]
-                    currency = CurenciesList(
-                        name_curr=code,
-                        currency_id=currency_info["ID"],
-                        name=currency_info["Name"],
-                        value=currency_info["Value"],
-                        previous=currency_info["Previous"]
-                    )
+        try:
+            response = requests.get(self.api_url, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+
+            currencies = {}
+            not_found = []
+
+            if "Valute" in data:
+                for code in currency_codes:
+                    if code == 'RUB':
+                        currency = CurenciesList(
+                            name_curr='RUB',
+                            currency_id='R00001',
+                            name='Российский рубль',
+                            value=1.0,
+                            previous=1.0
+                        )
+                        currencies['RUB'] = currency
+                    elif code in data["Valute"]:
+                        currency_info = data["Valute"][code]
+                        currency = CurenciesList(
+                            name_curr=code,
+                            currency_id=currency_info["ID"],
+                            name=currency_info["Name"],
+                            value=currency_info["Value"],
+                            previous=currency_info["Previous"]
+                        )
+                        currencies[code] = currency
+                    else:
+                        not_found.append(code)
+
+            for code in not_found:
+                print(f"Валюта {code} не найдена в API, создаем фиктивные данные")
+                currency = self._create_mock_currency(code)
+                if currency:
                     currencies[code] = currency
 
-        return currencies
-    except Exception as e:
-        print(f"Ошибка: {e}")
-        return {}</code></pre>
+            self._currencies_data.update(currencies)
+            return currencies
+
+        except Exception as e:
+            print(f"Ошибка при запросе API для курсов: {e}")
+            currencies = {}
+            for code in currency_codes:
+                currency = self._create_mock_currency(code)
+                if currency:
+                    currencies[code] = currency
+            return currencies</code></pre>
                         <p class="mt-3">
                             <strong>Особенности интеграции:</strong>
                         </p>
                         <ul>
                             <li>Использование requests для HTTP-запросов</li>
                             <li>Обработка исключений при ошибках сети</li>
-                            <li>Парсинг JSON ответа от API</li>
-                            <li>Кэширование данных для уменьшения нагрузки</li>
+                            <li>Mocking (подроднее в отчете 2)</li>
                             <li>Обновление курсов при каждом запросе /currencies или по кнопке</li>
                         </ul>
                     </div>
@@ -326,9 +356,9 @@ env = Environment(
                         <h6 class="mt-4">Применение принципов MVC:</h6>
                         <ul>
                             <li>Успешно реализовано разделение ответственности между компонентами</li>
-                            <li>Модели содержат только бизнес-логику и данные</li>
                             <li>Контроллеры обрабатывают запросы и управляют потоком данных</li>
                             <li>Представления отвечают только за отображение</li>
+                            <li>Реализовано разделение ответственности (MVC)</li>
                         </ul>
 
                         <h6 class="mt-4">Полученные знания:</h6>
