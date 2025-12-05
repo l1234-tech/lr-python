@@ -1,4 +1,3 @@
-# controllers/currencycontroller.py
 from models.currency_parser import CurrencyParser
 from models.currency import CurenciesList
 from controllers.databasecontroller import DatabaseController
@@ -56,7 +55,6 @@ class CurrencyController:
 
     def get_currency_history(self, currency_code: str, days: int = 90):
         """Получить историю курса валюты"""
-        # Исправлено: используем len() вместо .length
         db_history = self.db.get_currency_history(currency_code, days)
 
         if len(db_history) >= days:
