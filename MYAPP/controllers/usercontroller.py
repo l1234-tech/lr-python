@@ -1,4 +1,3 @@
-# controllers/usercontroller.py
 import sqlite3
 from controllers.databasecontroller import DatabaseController
 from models.user import User
@@ -7,28 +6,25 @@ from models.user import User
 class UserController:
     def __init__(self):
         self.db = DatabaseController()
-        # Создаем тестовых пользователей если их нет
         self._init_test_users()
 
     def _init_test_users(self):
         """Инициализация тестовых пользователей"""
         users = self.db.get_all_users()
         if not users:
-            # Добавляем тестовых пользователей
             user_ids = []
             user_ids.append(self.db.add_user("Андрей"))
             user_ids.append(self.db.add_user("Мария"))
             user_ids.append(self.db.add_user("Иван"))
 
-            # Добавляем тестовые подписки
             for user_id in user_ids:
-                if user_id == user_ids[0]:  # Андрей
+                if user_id == user_ids[0]:  
                     self.db.update_user_subscription(user_id, 'USD', True)
                     self.db.update_user_subscription(user_id, 'EUR', True)
-                elif user_id == user_ids[1]:  # Мария
+                elif user_id == user_ids[1]:  
                     self.db.update_user_subscription(user_id, 'GBP', True)
                     self.db.update_user_subscription(user_id, 'JPY', True)
-                elif user_id == user_ids[2]:  # Иван
+                elif user_id == user_ids[2]:  
                     self.db.update_user_subscription(user_id, 'CNY', True)
 
             print("Тестовые пользователи и подписки созданы")
@@ -61,7 +57,6 @@ class UserController:
                 user.remove_subscription(currency_code)
                 success = True
 
-        # Обновляем подписки в базе данных
         if success:
             self.db.update_user_subscription(user_id, currency_code, subscribe)
 
@@ -98,15 +93,12 @@ class UserController:
         if not user:
             return False
 
-        # Получаем текущие подписки
         current_subs = set(user.subscriptions)
         new_subs = set(subscriptions)
 
-        # Добавляем новые подписки
         for currency_code in new_subs - current_subs:
             self.update_user_subscription(user_id, currency_code, True)
 
-        # Удаляем старые подписки
         for currency_code in current_subs - new_subs:
             self.update_user_subscription(user_id, currency_code, False)
 
