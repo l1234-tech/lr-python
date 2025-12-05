@@ -1,4 +1,3 @@
-# controllers/databasecontroller.py
 import sqlite3
 from datetime import datetime
 from models import User
