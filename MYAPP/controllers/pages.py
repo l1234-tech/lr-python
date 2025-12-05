@@ -1,4 +1,3 @@
-# controllers/pages.py
 from jinja2 import Environment, PackageLoader
 from models import Author
 from controllers.currencycontroller import CurrencyController
@@ -52,7 +51,6 @@ class PagesController:
             for currency_code in user.subscriptions:
                 try:
                     hist = self.currency_ctrl.get_currency_history(currency_code, 30)
-                    # Исправлено: используем len() вместо .length
                     if hist and len(hist) > 0:
                         history[currency_code] = hist
                 except Exception as e:
@@ -162,7 +160,6 @@ class PagesController:
             user_dict = user.to_dict()
             user_data.append(user_dict)
 
-            # Исправлено: используем len() вместо .length
             user_subscriptions = user.subscriptions
             total_subscriptions += len(user_subscriptions)
 
