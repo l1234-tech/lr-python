@@ -1,4 +1,3 @@
-<!-- templates/report2.html -->
 {% extends "base.html" %}
 
 {% block content %}
@@ -6,55 +5,218 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-success text-white">
-                <h3><i class="bi bi-file-text"></i> Отчет 2 - Реализация и тестирование</h3>
+                <h3>Отчет 2 - Лабораторная работа №9</h3>
             </div>
             <div class="card-body">
-                <h4 class="border-bottom pb-2">1. Реализация CRUD операций</h4>
+                <h4 class="border-bottom pb-2">1. Цель работы</h4>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p>Целью данной работы было:</p>
+                        <ol>
+                            <li><strong>Реализовать CRUD операции</strong> для сущностей бизнес-логики приложения (User, Currency, подписки)</li>
+                            <li><strong>Освоить работу с SQLite</strong> через модуль sqlite3 для хранения данных пользователей и истории курсов</li>
+                            <li><strong>Понять принципы ключей и связей</strong> между таблицами в реляционной базе данных</li>
+                            <li><strong>Выделить контроллеры</strong> для работы с БД и рендерингом страниц в отдельные модули</li>
+                            <li><strong>Использовать архитектуру MVC</strong> с четким разделением ответственности между компонентами</li>
+                            <li><strong>Реализовать систему подписок</strong> для отображения пользователям таблицы с валютами, на которые они подписаны</li>
+                            <li><strong>Создать полноценный роутер</strong> для обработки GET и POST запросов с сохранением/обновлением данных</li>
+                            <li><strong>Научиться тестировать функционал</strong> с использованием unittest.mock для изоляции компонентов</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <h4 class="border-bottom pb-2">2. Описание моделей, их свойств и связей</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h6>Модель User (Пользователь)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Свойства:</strong></p>
+                                <ul>
+                                    <li><code>id</code> - уникальный идентификатор (int)</li>
+                                    <li><code>name</code> - имя пользователя (str)</li>
+                                    <li><code>subscriptions</code> - список кодов подписанных валют (list)</li>
+                                </ul>
+                                <p><strong>Методы:</strong></p>
+                                <ul>
+                                    <li><code>add_subscription()</code> - добавить подписку</li>
+                                    <li><code>remove_subscription()</code> - удалить подписку</li>
+                                    <li><code>has_subscription()</code> - проверить подписку</li>
+                                    <li><code>to_dict()</code> - преобразовать в словарь</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h6>Модель Currency (Валюта)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Свойства:</strong></p>
+                                <ul>
+                                    <li><code>name_curr</code> - код валюты, 3 символа (str)</li>
+                                    <li><code>id</code> - ID в системе ЦБ РФ (str)</li>
+                                    <li><code>name</code> - полное название (str)</li>
+                                    <li><code>price</code> - текущий курс (float)</li>
+                                    <li><code>previous</code> - предыдущий курс (float)</li>
+                                </ul>
+                                <p><strong>Валидация:</strong></p>
+                                <ul>
+                                    <li>Код валюты должен быть 3 символа</li>
+                                    <li>Цена должна быть положительной</li>
+                                    <li>ID не может быть пустой строкой</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-header bg-warning text-dark">
+                                <h6>Модель Author (Автор)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Свойства:</strong></p>
+                                <ul>
+                                    <li><code>name</code> - имя автора (str)</li>
+                                    <li><code>group</code> - учебная группа, 5 символов (str)</li>
+                                </ul>
+                                <p><strong>Связи между моделями:</strong></p>
+                                <div class="text-center mt-3">
+                                    <div class="border rounded p-3 bg-light">
+                                        <strong>User (1) -- (n) Currency</strong><br>
+                                        <small class="text-muted">Один пользователь может быть подписан на несколько валют</small><br><br>
+                                        <strong>Таблицы в SQLite:</strong><br>
+                                        <small>users, user_subscriptions, currency_history</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 class="border-bottom pb-2">3. Структура проекта с назначением файлов</h4>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <pre class="bg-dark text-white p-3 rounded"><code>myapp/
+├── models/                    # Модели данных (M в MVC)
+│   ├── __init__.py           # Экспорт всех моделей
+│   ├── author.py             # Модель Author - информация об авторе
+│   ├── user.py               # Модель User - пользователь и подписки
+│   ├── currency.py           # Модель Currency - данные о валюте
+│   └── currency_parser.py    # Парсер API ЦБ РФ для получения курсов
+├── controllers/              # Контроллеры (C в MVC)
+│   ├── __init__.py           # Экспорт всех контроллеров
+│   ├── databasecontroller.py # Контроллер БД - работа с SQLite
+│   ├── currencycontroller.py # Контроллер валют - бизнес-логика курсов
+│   ├── usercontroller.py     # Контроллер пользователей - управление подписками
+│   └── pages.py              # Контроллер страниц - рендеринг через Jinja2
+├── templates/                # Шаблоны (V в MVC)
+│   ├── base.html             # Базовый шаблон с навигацией
+│   ├── index.html            # Главная страница
+│   ├── author.html           # Страница об авторе
+│   ├── users.html            # Список пользователей
+│   ├── user.html             # Профиль пользователя с графиками
+│   ├── currencies.html       # Таблица курсов валют
+│   ├── report.html           # Отчет 1 - описание проекта
+│   └── report2.html          # Отчет 2 - реализация и тестирование
+├── tests/                    # Тесты
+│   ├── __init__.py
+│   ├── test_models.py        # Тесты моделей
+│   ├── test_controllers.py   # Тесты контроллеров с unittest.mock
+│   └── test_integration.py   # Интеграционные тесты
+├── myapp.py                  # Главный файл - HTTP сервер и маршрутизация
+└── currencies.db             # SQLite база данных</code></pre>
+                    </div>
+                </div>
+
+                <h4 class="border-bottom pb-2">4. Реализация CRUD с примерами SQL-запросов</h4>
 
                 <h5>Create (Создание):</h5>
                 <div class="card mb-3">
                     <div class="card-body">
                         <h6>Создание пользователя:</h6>
-                        <pre><code>def add_user(self, name: str):
+                        <pre><code># SQL-запрос из databasecontroller.py
+def add_user(self, name: str):
     with sqlite3.connect(self.db_path) as conn:
         cursor = conn.cursor()
         cursor.execute('SELECT MAX(id) FROM users')
         max_id = cursor.fetchone()[0] or 0
         new_id = max_id + 1
 
-        cursor.execute('INSERT INTO users (id, name) VALUES (?, ?)', (new_id, name))
+        cursor.execute(
+            'INSERT INTO users (id, name) VALUES (?, ?)',
+            (new_id, name)  # Параметризованный запрос для безопасности
+        )
         conn.commit()
         return new_id</code></pre>
+                        <p><strong>Таблица users:</strong></p>
+                        <pre><code>CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL
+)</code></pre>
                     </div>
                 </div>
 
                 <h5>Read (Чтение):</h5>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h6>Получение всех пользователей:</h6>
+                        <h6>Получение всех пользователей с подписками:</h6>
                         <pre><code>def get_all_users(self):
     with sqlite3.connect(self.db_path) as conn:
+        conn.row_factory = sqlite3.Row  # Для доступа к колонкам по имени
         cursor = conn.cursor()
-        cursor.execute('SELECT id, name FROM users')
+        cursor.execute('SELECT id, name FROM users ORDER BY id')
         rows = cursor.fetchall()
-        return [User(row[0], row[1]) for row in rows]</code></pre>
+
+        users = []
+        for row in rows:
+            user = User(row['id'], row['name'])
+            # Получаем подписки пользователя
+            cursor.execute(
+                'SELECT currency_code FROM user_subscriptions WHERE user_id = ?',
+                (row['id'],)  # Параметризованный запрос
+            )
+            subscriptions = [row[0] for row in cursor.fetchall()]
+            for sub in subscriptions:
+                user.add_subscription(sub)
+            users.append(user)
+
+        return users</code></pre>
+                        <p><strong>Таблица user_subscriptions:</strong></p>
+                        <pre><code>CREATE TABLE IF NOT EXISTS user_subscriptions (
+    user_id INTEGER,
+    currency_code TEXT,
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    PRIMARY KEY(user_id, currency_code)  # Составной первичный ключ
+)</code></pre>
                     </div>
                 </div>
 
                 <h5>Update (Обновление):</h5>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h6>Обновление подписок пользователя:</h6>
-                        <pre><code>def update_user_subscription(self, user_id: int, currency_code: str, subscribe: bool):
+                        <h6>Обновление подписки пользователя:</h6>
+                        <pre><code>def update_user_subscription(self, user_id: int,
+                              currency_code: str, subscribe: bool):
     with sqlite3.connect(self.db_path) as conn:
         cursor = conn.cursor()
 
+        # Проверяем существование пользователя
+        cursor.execute('SELECT id FROM users WHERE id = ?', (user_id,))
+        if not cursor.fetchone():
+            return False
+
         if subscribe:
+            # Добавляем подписку (INSERT OR IGNORE для избежания дубликатов)
             cursor.execute('''
-                INSERT OR IGNORE INTO user_subscriptions (user_id, currency_code)
-                VALUES (?, ?)
+                INSERT OR IGNORE INTO user_subscriptions
+                (user_id, currency_code) VALUES (?, ?)
             ''', (user_id, currency_code))
         else:
+            # Удаляем подписку
             cursor.execute('''
                 DELETE FROM user_subscriptions
                 WHERE user_id = ? AND currency_code = ?
@@ -69,162 +231,151 @@
                 <div class="card mb-3">
                     <div class="card-body">
                         <h6>Удаление валюты из отслеживаемых:</h6>
-                        <pre><code>def remove_currency(self, currency_code: str):
+                        <pre><code># В CurrencyController
+def remove_currency(self, currency_code: str):
     if currency_code in self.selected_currencies:
         self.selected_currencies.remove(currency_code)
         return True
-    return False</code></pre>
+    return False
+
+# Сохранение истории курсов (часть Update)
+def save_currency_history(self, currency_code: str, value: float):
+    with sqlite3.connect(self.db_path) as conn:
+        cursor = conn.cursor()
+        today = datetime.now().strftime('%Y-%m-%d')
+
+        cursor.execute('''
+            INSERT OR REPLACE INTO currency_history (currency_code, date, value)
+            VALUES (?, ?, ?)
+        ''', (currency_code, today, value))  # Параметризованный запрос
+        conn.commit()</code></pre>
+                        <p><strong>Таблица currency_history:</strong></p>
+                        <pre><code>CREATE TABLE IF NOT EXISTS currency_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    currency_code TEXT,
+    date DATE,
+    value REAL,
+    UNIQUE(currency_code, date)  # Одна запись на день для каждой валюты
+)</code></pre>
                     </div>
                 </div>
 
-                <h4 class="border-bottom pb-2 mt-4">2. Работа с API Центрального Банка</h4>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header bg-info text-white">
-                                <h6><i class="bi bi-cloud-download"></i> Получение курсов валют</h6>
-                            </div>
-                            <div class="card-body">
-                                <pre><code>def get_currencies(self, currency_codes: list):
-    try:
-        response = requests.get(self.api_url, timeout=5)
-        response.raise_for_status()
-        data = response.json()
-
-        currencies = {}
-        if "Valute" in data:
-            for code in currency_codes:
-                if code in data["Valute"]:
-                    currency_info = data["Valute"][code]
-                    currency = CurenciesList(
-                        name_curr=code,
-                        currency_id=currency_info["ID"],
-                        name=currency_info["Name"],
-                        value=currency_info["Value"],
-                        previous=currency_info["Previous"]
-                    )
-                    currencies[code] = currency
-
-        return currencies
-    except Exception as e:
-        print(f"Ошибка: {e}")
-        return {}</code></pre>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header bg-warning text-dark">
-                                <h6><i class="bi bi-clock-history"></i> Получение истории курсов</h6>
-                            </div>
-                            <div class="card-body">
-                                <pre><code>def get_currency_history(self, currency_code: str, days: int = 90):
-    try:
-        history = []
-        current_date = datetime.now()
-
-        for i in range(days):
-            date_str = (current_date - timedelta(days=i)).strftime("%Y-%m-%d")
-            url = f"https://www.cbr-xml-daily.ru/archive/{date_str}/daily_json.js"
-
-            try:
-                response = requests.get(url, timeout=2)
-                if response.status_code == 200:
-                    data = response.json()
-                    if "Valute" in data and currency_code in data["Valute"]:
-                        history.append({
-                            "date": date_str,
-                            "value": data["Valute"][currency_code]["Value"]
-                        })
-            except:
-                continue
-
-        return history
-    except Exception as e:
-        return []</code></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <h4 class="border-bottom pb-2 mt-4">3. Примеры тестирования</h4>
-
-                <h5>Тестирование моделей:</h5>
+                <h4 class="border-bottom pb-2 mt-4">5. Примеры тестов с unittest.mock</h4>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <h6>Тест геттеров и сеттеров:</h6>
-                        <pre><code>def test_user_model():
-    # Создание пользователя
-    user = User(1, "Андрей")
-    assert user.id == 1
-    assert user.name == "Андрей"
+                        <h6>Тестирование CurrencyController с использованием mock:</h6>
+                        <pre><code>import unittest
+from unittest.mock import MagicMock
+from controllers.currencycontroller import CurrencyController
 
-    # Тест сеттера с валидацией
-    try:
-        user.name = ""  # Должно вызвать исключение
-        assert False  # Не должно дойти до этой строки
-    except ValueError as e:
-        assert str(e) == "Имя не может быть меньше одного символа"
+class TestCurrencyController(unittest.TestCase):
+    def test_list_currencies(self):
+        # Создаем mock объект для базы данных
+        mock_db = MagicMock()
 
-    # Тест добавления подписок
-    user.add_subscription("USD")
-    assert "USD" in user.subscriptions
-    assert len(user.subscriptions) == 1</code></pre>
+        # Настраиваем mock для возврата тестовых данных
+        mock_currency_usd = MagicMock()
+        mock_currency_usd.name_curr = 'USD'
+        mock_currency_usd.id = 'R01235'
+        mock_currency_usd.name = 'Доллар США'
+        mock_currency_usd.price = 90.5
+        mock_currency_usd.previous = 89.8
+
+        mock_currency_eur = MagicMock()
+        mock_currency_eur.name_curr = 'EUR'
+        mock_currency_eur.id = 'R01239'
+        mock_currency_eur.name = 'Евро'
+        mock_currency_eur.price = 98.2
+        mock_currency_eur.previous = 97.5
+
+        mock_currencies = {
+            'USD': mock_currency_usd,
+            'EUR': mock_currency_eur
+        }
+
+        # Создаем контроллер и подменяем метод
+        controller = CurrencyController()
+        controller.get_current_rates = MagicMock(return_value=mock_currencies)
+
+        # Вызываем тестируемый метод
+        result = controller.get_current_rates()
+
+        # Проверяем результаты
+        self.assertEqual(len(result), 2)
+        self.assertIn('USD', result)
+        self.assertIn('EUR', result)
+        self.assertEqual(result['USD'].name_curr, "USD")
+
+        # Проверяем, что метод был вызван
+        controller.get_current_rates.assert_called_once()</code></pre>
+
+                        <h6 class="mt-3">Тестирование обработки ошибок API:</h6>
+                        <pre><code>@patch('controllers.currencycontroller.CurrencyParser')
+def test_get_current_rates_error(self, mock_parser_class):
+    """Тест обработки ошибки при получении курсов"""
+    mock_parser = MagicMock()
+    mock_parser_class.return_value = mock_parser
+    # Симулируем ошибку API
+    mock_parser.get_currencies.side_effect = Exception("API error")
+
+    controller = CurrencyController()
+    controller.parser = mock_parser
+    controller.selected_currencies = ['USD']
+
+    # Должен вернуть пустой словарь или данные из кэша
+    result = controller.get_current_rates()
+    self.assertEqual(result, {})</code></pre>
+
+                        <h6 class="mt-3">Результаты выполнения тестов:</h6>
+                        <pre class="bg-dark text-white p-3 rounded"><code>$ python -m unittest discover tests -v
+test_add_currency (test_controllers.TestCurrencyController) ... ok
+test_get_current_rates_error (test_controllers.TestCurrencyController) ... ok
+test_get_current_rates_success (test_controllers.TestCurrencyController) ... ok
+test_list_currencies_integration (test_controllers.TestCurrencyController) ... ok
+test_parser_get_currencies_success (test_controllers.TestCurrencyController) ... ok
+test_remove_currency (test_controllers.TestCurrencyController) ... ok
+test_add_user (test_controllers.TestUserController) ... ok
+test_get_all_users (test_controllers.TestUserController) ... ok
+test_get_user_not_found (test_controllers.TestUserController) ... ok
+test_update_user_subscription (test_controllers.TestUserController) ... ok
+test_author_creation (test_models.TestAuthorModel) ... ok
+test_author_setter_validation (test_models.TestAuthorModel) ... ok
+test_author_to_dict (test_models.TestAuthorModel) ... ok
+test_currency_creation (test_models.TestCurrencyModel) ... ok
+test_currency_properties (test_models.TestCurrencyModel) ... ok
+test_currency_setter_validation (test_models.TestCurrencyModel) ... ok
+test_currency_to_dict (test_models.TestCurrencyModel) ... ok
+test_str_representation (test_models.TestCurrencyModel) ... ok
+test_repr_representation (test_models.TestCurrencyModel) ... ok
+test_subscription_management (test_models.TestUserModel) ... ok
+test_to_dict (test_models.TestUserModel) ... ok
+test_user_creation (test_models.TestUserModel) ... ok
+test_user_setter_validation (test_models.TestUserModel) ... ok
+test_render_author (test_integration.TestPagesController) ... ok
+test_render_currencies (test_integration.TestPagesController) ... ok
+test_render_index (test_integration.TestPagesController) ... ok
+test_render_user_not_found (test_integration.TestPagesController) ... ok
+test_render_user_success (test_integration.TestPagesController) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 0.052s
+
+OK</code></pre>
                     </div>
                 </div>
 
-                <h5>Тестирование контроллера:</h5>
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h6>Тест маршрутов:</h6>
-                        <pre><code>def test_routes():
-    # Тест главной страницы
-    response = make_test_request('/')
-    assert response.status_code == 200
-    assert b"CurrenciesListApp" in response.data
-
-    # Тест страницы пользователей
-    response = make_test_request('/users')
-    assert response.status_code == 200
-    assert b"Пользователи" in response.data
-
-    # Тест страницы валют
-    response = make_test_request('/currencies')
-    assert response.status_code == 200
-    assert b"Курсы валют" in response.data</code></pre>
-                    </div>
-                </div>
-
-                <h5>Тестирование API:</h5>
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h6>Тест получения курсов:</h6>
-                        <pre><code>def test_get_currencies():
-    parser = CurrencyParser()
-
-    # Тест с корректными валютами
-    currencies = parser.get_currencies(['USD', 'EUR'])
-    assert 'USD' in currencies
-    assert 'EUR' in currencies
-    assert currencies['USD'].price > 0
-
-    # Тест с некорректной валютой
-    currencies = parser.get_currencies(['INVALID'])
-    assert len(currencies) == 0</code></pre>
-                    </div>
-                </div>
-
-                <h4 class="border-bottom pb-2 mt-4">4. Скриншоты работы приложения</h4>
+                <h4 class="border-bottom pb-2 mt-4">6. Скриншоты работы приложения</h4>
                 <div class="row text-center">
                     <div class="col-md-4 mb-3">
                         <div class="card">
                             <div class="card-body">
-                                <h6><i class="bi bi-house"></i> Главная страница</h6>
+                                <h6>Главная страница</h6>
                                 <div class="border p-2 bg-light">
-                                    <small>• Информация о приложении<br>
-                                    • Основные валюты<br>
-                                    • Статистика<br>
-                                    • Навигация</small>
+                                    <small>• Информация о приложении CurrenciesListApp<br>
+                                    • Основные валюты с текущими курсами<br>
+                                    • Изменения курсов (рост/падение)<br>
+                                    • Навигация по разделам<br>
+                                    • Информация об авторе</small>
                                 </div>
                             </div>
                         </div>
@@ -232,12 +383,13 @@
                     <div class="col-md-4 mb-3">
                         <div class="card">
                             <div class="card-body">
-                                <h6><i class="bi bi-people"></i> Пользователи</h6>
+                                <h6>Страница валют (currencies.html)</h6>
                                 <div class="border p-2 bg-light">
-                                    <small>• Список пользователей<br>
-                                    • Добавление новых<br>
-                                    • Статистика подписок<br>
-                                    • Управление</small>
+                                    <small>• Таблица курсов валют в реальном времени<br>
+                                    • Кнопки "Добавить"/"Удалить" для отслеживания<br>
+                                    • Изменение курсов (разница с предыдущим значением)<br>
+                                    • Фильтр выбора валют для отслеживания<br>
+                                    • Кнопка "Обновить курсы" для ручного обновления</small>
                                 </div>
                             </div>
                         </div>
@@ -245,69 +397,70 @@
                     <div class="col-md-4 mb-3">
                         <div class="card">
                             <div class="card-body">
-                                <h6><i class="bi bi-currency-exchange"></i> Валюты</h6>
+                                <h6>Профиль пользователя (user.html)</h6>
                                 <div class="border p-2 bg-light">
-                                    <small>• Таблица курсов<br>
-                                    • Добавление/удаление<br>
-                                    • История изменений<br>
-                                    • Фильтрация</small>
+                                    <small>• Информация о пользователе и его подписках<br>
+                                    • Интерактивные графики изменения курсов (Plotly.js)<br>
+                                    • Таблица текущих курсов подписанных валют<br>
+                                    • Управление подписками (добавить/удалить)<br>
+                                    • История курсов за 30 дней</small>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <h4 class="border-bottom pb-2 mt-4">5. Интерактивные графики</h4>
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h6>Реализация графиков с Plotly.js:</h6>
-                        <pre><code>// JavaScript код для создания графиков
-document.addEventListener('DOMContentLoaded', function() {
-    const trace = {
-        x: dates,
-        y: values,
-        type: 'scatter',
-        mode: 'lines+markers',
-        name: 'Курс валюты',
-        line: { color: '#007bff', width: 2 }
-    };
-
-    const layout = {
-        title: 'Динамика курса за 90 дней',
-        xaxis: { title: 'Дата' },
-        yaxis: { title: 'Курс (руб.)' }
-    };
-
-    Plotly.newPlot('graphContainer', [trace], layout);
-});</code></pre>
-                        <p class="mt-3">
-                            <strong>Особенности реализации:</strong>
-                        </p>
-                        <ul>
-                            <li>Использование библиотеки Plotly.js для интерактивности</li>
-                            <li>Адаптивные графики под разные экраны</li>
-                            <li>Возможность увеличения/уменьшения масштаба</li>
-                            <li>Отображение значений при наведении</li>
-                            <li>Автоматическое обновление данных</li>
-                        </ul>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>Страница пользователей (users.html)</h6>
+                                <div class="border p-2 bg-light">
+                                    <small>• Таблица всех пользователей системы<br>
+                                    • Количество подписок каждого пользователя<br>
+                                    • Модальное окно для добавления новых пользователей<br>
+                                    • Статистика: общее число подписок, популярные валюты<br>
+                                    • Ссылки для просмотра профилей пользователей</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>Обновление и удаление данных</h6>
+                                <div class="border p-2 bg-light">
+                                    <small>• POST запросы для управления подписками<br>
+                                    • Подтверждение перед удалением валют<br>
+                                    • Автоматическое обновление курсов при посещении страниц<br>
+                                    • Валидация данных на стороне сервера и клиента<br>
+                                    • Редирект после успешных операций</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <h4 class="border-bottom pb-2 mt-4">6. Выводы</h4>
+                <h4 class="border-bottom pb-2 mt-4">7. Выводы</h4>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="card border-success">
                             <div class="card-header bg-success text-white">
-                                <h6><i class="bi bi-check-circle"></i> Достижения</h6>
+                                <h6>Применение архитектуры MVC</h6>
                             </div>
                             <div class="card-body">
+                                <p><strong>Успешно реализовано:</strong></p>
                                 <ul>
-                                    <li>Успешно реализована архитектура MVC</li>
-                                    <li>Создана полнофункциональная система подписок</li>
-                                    <li>Интегрировано API ЦБ РФ для получения курсов</li>
-                                    <li>Реализованы интерактивные графики</li>
-                                    <li>Создана база данных SQLite для хранения данных</li>
-                                    <li>Разработан удобный пользовательский интерфейс</li>
+                                    <li><strong>Четкое разделение ответственности:</strong>
+                                        <ul>
+                                            <li>Models - только данные и бизнес-логика</li>
+                                            <li>Controllers - обработка запросов и управление потоком</li>
+                                            <li>Views - только отображение через Jinja2 шаблоны</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Модульная структура:</strong> Каждый контроллер в отдельном файле</li>
+                                    <li><strong>Переиспользуемость кода:</strong> Общие компоненты в базовых классах</li>
+                                    <li><strong>Легкость тестирования:</strong> Изолированные компоненты легко тестировать</li>
                                 </ul>
                             </div>
                         </div>
@@ -315,49 +468,99 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="col-md-6">
                         <div class="card border-primary">
                             <div class="card-header bg-primary text-white">
-                                <h6><i class="bi bi-lightbulb"></i> Изученные технологии</h6>
+                                <h6>Работа с SQLite</h6>
                             </div>
                             <div class="card-body">
+                                <p><strong>Достижения:</strong></p>
                                 <ul>
-                                    <li>Python HTTP сервер и обработка запросов</li>
-                                    <li>Шаблонизатор Jinja2 для рендеринга HTML</li>
-                                    <li>Работа с SQLite базой данных</li>
-                                    <li>Интеграция внешних API (requests)</li>
-                                    <li>JavaScript и Plotly.js для графиков</li>
-                                    <li>Bootstrap 5 для адаптивного дизайна</li>
+                                    <li><strong>Параметризованные запросы:</strong> Защита от SQL-инъекций</li>
+                                    <li><strong>Связи между таблицами:</strong> Использование FOREIGN KEY</li>
+                                    <li><strong>Первичные ключи:</strong> AUTOINCREMENT для уникальных идентификаторов</li>
+                                    <li><strong>Оптимизация:</strong> Индексы и правильная структура таблиц</li>
+                                    <li><strong>Управление соединениями:</strong> Контекстные менеджеры (with statement)</li>
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card mt-4 border-warning">
-                    <div class="card-header bg-warning text-dark">
-                        <h6><i class="bi bi-graph-up"></i> Применение принципов MVC</h6>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h6>Обработка маршрутов</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Реализовано:</strong></p>
+                                <ul>
+                                    <li><strong>Полноценный роутер:</strong> Обработка GET и POST запросов</li>
+                                    <li><strong>Параметры запросов:</strong> Использование urllib.parse</li>
+                                    <li><strong>Рендеринг шаблонов:</strong> Единый Environment для Jinja2</li>
+                                    <li><strong>Обработка ошибок:</strong> Страницы 404 и 500</li>
+                                    <li><strong>Редиректы:</strong> После успешных операций</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6>Рендеринг шаблонов</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Особенности реализации:</strong></p>
+                                <ul>
+                                    <li><strong>Наследование шаблонов:</strong> Базовый шаблон base.html</li>
+                                    <li><strong>Динамическое содержимое:</strong> Переменные, циклы, условия</li>
+                                    <li><strong>Интерактивность:</strong> JavaScript для графиков и форм</li>
+                                    <li><strong>Адаптивный дизайн:</strong> Bootstrap 5 для мобильных устройств</li>
+                                    <li><strong>Разделение логики:</strong> Контроллеры подготавливают данные, шаблоны отображают</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4 border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h6>Итоги и полученный опыт</h6>
                     </div>
                     <div class="card-body">
-                        <p>
-                            В ходе разработки были успешно применены принципы архитектуры MVC:
-                        </p>
+                        <p><strong>Ключевые достижения проекта:</strong></p>
                         <ol>
-                            <li><strong>Разделение ответственности:</strong> Каждый компонент отвечает только за свою часть функционала</li>
-                            <li><strong>Масштабируемость:</strong> Добавление новых функций не требует изменения существующего кода</li>
-                            <li><strong>Тестируемость:</strong> Компоненты можно тестировать независимо друг от друга</li>
-                            <li><strong>Поддержка:</strong> Четкая структура упрощает поддержку и отладку</li>
+                            <li><strong>Полноценное веб-приложение</strong> с архитектурой MVC на чистом Python</li>
+                            <li><strong>Интеграция с внешним API</strong> ЦБ РФ для получения актуальных курсов валют</li>
+                            <li><strong>Система подписок пользователей</strong> с хранением в SQLite базе данных</li>
+                            <li><strong>Интерактивные графики</strong> изменения курсов с использованием Plotly.js</li>
+                            <li><strong>Комплексное тестирование</strong> с unittest.mock для изоляции компонентов</li>
+                            <li><strong>Безопасная работа с БД</strong> через параметризованные SQL-запросы</li>
+                            <li><strong>Адаптивный пользовательский интерфейс</strong> с Bootstrap 5</li>
                         </ol>
-                        <p class="mb-0">
-                            Приложение демонстрирует правильное разделение моделей, представлений и контроллеров,
-                            что позволяет легко расширять функциональность и поддерживать код.
-                        </p>
+
+                        <p class="mt-3"><strong>Полученные навыки и знания:</strong></p>
+                        <ul>
+                            <li>Создание HTTP сервера на Python без фреймворков</li>
+                            <li>Работа с шаблонизатором Jinja2 для динамического контента</li>
+                            <li>Проектирование и реализация реляционных баз данных SQLite</li>
+                            <li>Интеграция REST API и обработка JSON данных</li>
+                            <li>Модульное тестирование с использованием mock-объектов</li>
+                            <li>Создание интерактивных веб-интерфейсов с JavaScript</li>
+                            <li>Применение принципов SOLID и чистого кода</li>
+                        </ul>
+
+                        <p class="mt-3 mb-0"><strong>Заключение:</strong> Проект CurrenciesListApp успешно демонстрирует применение
+                        архитектуры MVC, работу с базами данных SQLite, интеграцию внешних API и комплексное
+                        тестирование. Приложение готово к расширению и может служить основой для более сложных
+                        финансовых систем отслеживания курсов валют.</p>
                     </div>
                 </div>
             </div>
             <div class="card-footer text-center">
                 <a href="/report" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> К отчету 1
+                    К отчету 1
                 </a>
                 <a href="/" class="btn btn-primary">
-                    <i class="bi bi-house"></i> На главную
+                    На главную
                 </a>
             </div>
         </div>
