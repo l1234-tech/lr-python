@@ -87,7 +87,6 @@
     </div>
 </div>
 
-<!-- Модальное окно добавления пользователя -->
 <div class="modal fade" id="addUserModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -116,7 +115,6 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Логика для обработки формы добавления пользователя
         const addUserForm = document.querySelector('form[action="/users/add"]');
         if (addUserForm) {
             addUserForm.addEventListener('submit', function(e) {
