@@ -21,7 +21,6 @@
             padding: 30px;
             border-radius: 10px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         h1 {
@@ -64,12 +63,6 @@
             border-radius: 6px;
             padding: 20px;
             margin: 15px 0;
-            transition: transform 0.2s;
-        }
-
-        .method-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .method-name {
@@ -111,10 +104,6 @@
             background-color: #f9f9f9;
         }
 
-        .results-table tr:hover {
-            background-color: #f1f8ff;
-        }
-
         .time-cell {
             font-weight: bold;
             color: #27ae60;
@@ -125,35 +114,8 @@
             border-left: 4px solid #28a745;
         }
 
-        .comparison-chart {
-            height: 300px;
-            margin: 30px 0;
-            position: relative;
-        }
-
-        .chart-bar {
-            display: flex;
-            align-items: center;
-            margin: 15px 0;
-            height: 40px;
-        }
-
-        .chart-label {
-            width: 200px;
-            font-weight: bold;
-        }
-
-        .chart-value {
-            flex-grow: 1;
-            background: #3498db;
-            height: 100%;
-            border-radius: 4px;
-            color: white;
-            display: flex;
-            align-items: center;
-            padding-left: 10px;
-            min-width: 100px;
-            transition: width 1s ease;
+        .nogil-section {
+            border-left: 4px solid #e74c3c;
         }
 
         .note-box {
@@ -204,48 +166,42 @@
             font-size: 0.9em;
         }
 
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
+        .threads-table {
+            width: 100%;
+            margin: 20px 0;
+            background: #f8f9fa;
+            border-radius: 6px;
+            overflow: hidden;
+        }
 
-            section {
-                padding: 15px;
-            }
+        .threads-table th {
+            background: #495057;
+            color: white;
+            padding: 10px;
+        }
 
-            .chart-label {
-                width: 150px;
-                font-size: 0.9em;
-            }
+        .threads-table td {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Отчет по реализации методов численного интегрирования</h1>
-        <div class="subtitle">Сравнение производительности четырех методов вычисления определенного интеграла</div>
+        <h1>Отчет по лабораточной работе №10</h1>
+        <div class="subtitle">Интеграрование потоками, процессами, переводом на С и обходом GIL</div>
     </header>
 
     <section>
         <h2>1. Краткое описание методов</h2>
 
         <div class="method-card">
-            <div class="method-name">1.1. Базовый метод (integrate) <span class="complexity">O(n)</span></div>
+            <div class="method-name">1.1. Базовый метод (integrate)</div>
             <p><strong>Алгоритм:</strong> Метод левых прямоугольников</p>
             <ul>
                 <li>Итеративный подход без параллелизации</li>
-                <li>Разбивает отрезок [a, b] на n_iter равных частей</li>
-                <li>Вычисляет сумму значений функции в левых концах подинтервалов</li>
-                <li>Простая реализация, минимальные накладные расходы</li>
+                <li>Минимальные накладные расходы</li>
             </ul>
-            <div class="code-snippet">
-# Основной цикл вычислений
-acc = 0
-step = (b - a) / n_iter
-for i in range(n_iter):
-    acc += f(a + i * step) * step
-return acc
-            </div>
         </div>
 
         <div class="method-card">
@@ -254,13 +210,8 @@ return acc
             <ul>
                 <li>Разделяет отрезок интегрирования на n_jobs частей</li>
                 <li>Каждая часть вычисляется в отдельном потоке</li>
-                <li>Использует concurrent.futures.ThreadPoolExecutor</li>
-                <li>Подходит для I/O-bound задач</li>
+                <li>Ограничен GIL (Global Interpreter Lock)</li>
             </ul>
-            <div class="note-box">
-                <strong>Примечание:</strong> В строке <code>fs = [spawn(a + i * step, a + (i + 1) * step) for i in range(n_jobs)]</code>
-                создаются объекты Future, представляющие ожидаемые результаты, а не сами вычисления. Вычисления выполняются асинхронно в пуле потоков.
-            </div>
         </div>
 
         <div class="method-card">
@@ -269,45 +220,57 @@ return acc
             <ul>
                 <li>Разделяет отрезок интегрирования на n_jobs частей</li>
                 <li>Каждая часть вычисляется в отдельном процессе</li>
-                <li>Использует concurrent.futures.ProcessPoolExecutor</li>
-                <li>Обходит ограничение GIL, подходит для CPU-bound задач</li>
+                <li>Обходит ограничение GIL</li>
             </ul>
-            <div class="warning-box">
-                <strong>Важное замечание:</strong> Требует запуска в блоке <code>if __name__ == '__main__':</code> для корректной работы
-                на Windows и предотвращения рекурсивного создания процессов.
-            </div>
         </div>
 
         <div class="method-card">
             <div class="method-name">1.4. Оптимизированный метод на Cython (integrate_cython)</div>
             <p><strong>Алгоритм:</strong> Компилируемая версия метода левых прямоугольников</p>
-            <p><strong>Три варианта реализации:</strong></p>
-            <ol>
-                <li><strong>Универсальная:</strong> Принимает любую Python-функцию</li>
-                <li><strong>Специализированная:</strong> Для конкретных функций (sin, cos, exp, x²) с прямой линковкой C-функций</li>
-                <li><strong>Комбинированная:</strong> Диспетчеризация по имени функции</li>
-            </ol>
-            <p><strong>Оптимизации:</strong></p>
             <ul>
                 <li>Статическая типизация C-переменных</li>
                 <li>Директивы: boundscheck=False, wraparound=False, cdivision=True</li>
             </ul>
-            <div class="code-snippet">
-# Пример специализированной функции в Cython
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.cdivision(True)
-cpdef double integrate_sin(double a, double b, int n_iter=1000):
-    cdef double acc = 0.0
-    cdef double step = (b - a) / n_iter
-    cdef int i
-    cdef double x
+        </div>
 
-    for i in range(n_iter):
-        x = a + i * step
-        acc += sin(x) * step  # Прямой вызов C-функции
-    return acc
-            </div>
+        <div class="method-card nogil-section">
+            <div class="method-name">1.5. Мультипроцессинг как аналог noGIL (integrate_processes_mp)</div>
+            <p><strong>Алгоритм:</strong> multiprocessing с разделением отрезка</p>
+            <ul>
+                <li>Использует модуль multiprocessing напрямую</li>
+                <li>Каждая часть вычисляется в отдельном процессе</li>
+                <li>Полностью обходит ограничения GIL</li>
+                <li>Аналогичен работе потоков в режиме noGIL</li>
+            </ul>
+            <div class="code-snippet">
+<pre>def integrate_processes_mp(f, a, b, *, n_jobs=2, n_iter=1000):
+    result_queue = mp.Queue()
+    processes = []
+
+    step = (b - a) / n_jobs
+    seg_iter = n_iter // n_jobs
+
+    for i in range(n_jobs):
+        a_seg = a + i * step
+        b_seg = a + (i + 1) * step
+
+        p = mp.Process(
+            target=worker,
+            args=(f, a_seg, b_seg, seg_iter, result_queue, i)
+        )
+        processes.append(p)
+        p.start()
+
+    results = [0.0] * n_jobs
+    for _ in range(n_jobs):
+        idx, result = result_queue.get()
+        results[idx] = result
+
+    for p in processes:
+        p.join()
+
+    return sum(results)</pre>
+</div>
         </div>
     </section>
 
@@ -317,32 +280,12 @@ cpdef double integrate_sin(double a, double b, int n_iter=1000):
         <h3>2.1. Корректность вычислений</h3>
         <p>Все реализации успешно прошли тесты:</p>
         <ul>
-            <li>Интеграл log₂(x) от 1 до 2: ожидается ~0.5573 ✓</li>
-            <li>Интеграл cos(x) от 0 до π/2: ожидается 1.0 ✓</li>
-            <li>Интеграл sin(x) от 0 до π: ожидается 2.0 ✓</li>
+            <li>Интеграл sin(x) от 0 до π: ожидается 2.00000</li>
+            <li>Все методы дают одинаковый результат с точностью до 5 знаков</li>
         </ul>
 
         <h3>2.2. Производительность (10,000,000 итераций)</h3>
         <p>Интеграл sin(x) от 0 до π:</p>
-
-        <div class="comparison-chart">
-            <div class="chart-bar">
-                <div class="chart-label">Integrate_1 (базовый)</div>
-                <div class="chart-value" style="width: 100%; background: #e74c3c;">1.2497 сек</div>
-            </div>
-            <div class="chart-bar">
-                <div class="chart-label">Integrate_async (потоки)</div>
-                <div class="chart-value" style="width: 82.6%; background: #f39c12;">1.0322 сек</div>
-            </div>
-            <div class="chart-bar">
-                <div class="chart-label">Integrate_cython (Cython)</div>
-                <div class="chart-value" style="width: 74.9%; background: #3498db;">0.9355 сек</div>
-            </div>
-            <div class="chart-bar">
-                <div class="chart-label">Integrate_process (процессы)</div>
-                <div class="chart-value" style="width: 47.4%; background: #2ecc71;">0.5928 сек</div>
-            </div>
-        </div>
 
         <table class="results-table">
             <thead>
@@ -357,150 +300,184 @@ cpdef double integrate_sin(double a, double b, int n_iter=1000):
             <tbody>
                 <tr>
                     <td>Integrate_1 (базовый)</td>
-                    <td class="time-cell">1.2497 сек</td>
+                    <td class="time-cell">0.6347 сек</td>
                     <td>2.00000</td>
                     <td>1.00x</td>
                     <td>Последовательное выполнение</td>
                 </tr>
                 <tr>
                     <td>Integrate_async (потоки)</td>
-                    <td class="time-cell">1.0322 сек</td>
+                    <td class="time-cell">0.5785 сек</td>
                     <td>2.00000</td>
-                    <td>1.21x</td>
+                    <td>1.10x</td>
                     <td>Ограничен GIL</td>
                 </tr>
                 <tr>
                     <td>Integrate_cython (Cython)</td>
-                    <td class="time-cell">0.9355 сек</td>
+                    <td class="time-cell">0.6058 сек</td>
                     <td>2.00000</td>
-                    <td>1.34x</td>
+                    <td>1.05x</td>
                     <td>Компиляция в C-код</td>
                 </tr>
+                <tr>
+                    <td>Integrate_process (процессы)</td>
+                    <td class="time-cell">0.3741 сек</td>
+                    <td>2.00000</td>
+                    <td>1.70x</td>
+                    <td>ProcessPoolExecutor</td>
+                </tr>
                 <tr class="fastest">
-                    <td><strong>Integrate_process (процессы)</strong></td>
-                    <td class="time-cell"><strong>0.5928 сек</strong></td>
+                    <td><strong>Integrate_5_processes_mp (2 процесса)</strong></td>
+                    <td class="time-cell"><strong>0.3823 сек</strong></td>
                     <td><strong>2.00000</strong></td>
-                    <td><strong>2.11x</strong></td>
-                    <td><strong>Истинный параллелизм</strong></td>
+                    <td><strong>1.66x</strong></td>
+                    <td><strong>Аналог noGIL</strong></td>
                 </tr>
             </tbody>
         </table>
     </section>
 
-    <section>
-        <h2>3. Анализ производительности</h2>
+    <section class="nogil-section">
+        <h2>3. Анализ noGIL и многопоточности</h2>
 
-        <h3>3.1. ProcessPoolExecutor - наилучшая производительность (0.5928 сек)</h3>
-        <ul>
-            <li>Параллелизм на уровне процессов обходит GIL</li>
-            <li>Эффективное использование многоядерных процессоров</li>
-            <li>Накладные расходы на создание процессов компенсируются параллельными вычислениями</li>
-        </ul>
+        <h3>3.1. Тестирование с разным количеством процессов (аналог noGIL)</h3>
 
-        <h3>3.2. Cython - второе место (0.9355 сек)</h3>
-        <ul>
-            <li>Значительное ускорение за счет компиляции в C</li>
-            <li>Использование статических типов и оптимизаций</li>
-            <li>Минимальные накладные расходы на вызовы Python API</li>
-        </ul>
+        <table class="threads-table">
+            <thead>
+                <tr>
+                    <th>Количество процессов</th>
+                    <th>Время выполнения</th>
+                    <th>Ускорение относительно базового</th>
+                    <th>Примечания</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2 процесса</td>
+                    <td>0.3994 сек</td>
+                    <td>1.59x</td>
+                    <td>Уже лучше потоков с GIL</td>
+                </tr>
+                <tr>
+                    <td>4 процесса</td>
+                    <td>0.2623 сек</td>
+                    <td>2.42x</td>
+                    <td>Значительное улучшение</td>
+                </tr>
+                <tr class="fastest">
+                    <td><strong>6 процессов</strong></td>
+                    <td><strong>0.2418 сек</strong></td>
+                    <td><strong>2.63x</strong></td>
+                    <td><strong>Оптимальное количество</strong></td>
+                </tr>
+                <tr>
+                    <td>8 процессов</td>
+                    <td>0.2424 сек</td>
+                    <td>2.62x</td>
+                    <td>Плато производительности</td>
+                </tr>
+                <tr>
+                    <td>10 процессов</td>
+                    <td>0.2542 сек</td>
+                    <td>2.50x</td>
+                    <td>Накладные расходы</td>
+                </tr>
+            </tbody>
+        </table>
 
-        <h3>3.3. ThreadPoolExecutor - умеренное ускорение (1.0322 сек)</h3>
-        <ul>
-            <li>Ограничен GIL для CPU-bound операций</li>
-            <li>Ускорение достигается за счет параллельного выполнения операций ввода-вывода</li>
-            <li>Для чисто вычислительных задач в Python неэффективен</li>
-        </ul>
+        <h3>3.2. Почему noGIL увеличивает скорость до 6-8 потоков</h3>
 
-        <h3>3.4. Базовый метод - самый медленный (1.2497 сек)</h3>
-        <ul>
-            <li>Последовательное выполнение</li>
-            <li>Минимальные накладные расходы, но нет параллелизма</li>
-        </ul>
+        <div class="method-card">
+            <div class="method-name">Принцип работы noGIL</div>
+            <p>noGIL (No Global Interpreter Lock) позволяет потокам Python выполняться действительно параллельно, а не последовательно, как при обычном GIL.</p>
+
+            <p><strong>Наблюдения из тестов:</strong></p>
+            <ol>
+                <li><strong>2 процесса:</strong> 1.59x ускорение - уже лучше потоков с GIL</li>
+                <li><strong>4 процесса:</strong> 2.42x ускорение - почти линейное масштабирование</li>
+                <li><strong>6 процессов:</strong> 2.63x ускорение - оптимальная точка</li>
+                <li><strong>8+ процессов:</strong> уменьшение производительности</li>
+            </ol>
+        </div>
+
+        <div class="note-box">
+            <strong>Наблюдение №1:</strong> После 6 процессов время выполнения практически не уменьшается (0.2418 сек для 6 процессов vs 0.2424 сек для 8 процессов). Это связано с:
+            <ul>
+                <li>Накладными расходами на создание и управление процессами</li>
+                <li>Конкуренцией за ресурсы CPU и память</li>
+                <li>Физическими ограничениями процессора (количество ядер/потоков)</li>
+            </ul>
+        </div>
+        <div class="note-box">
+            <strong>Наблюдение №2:</strong> Cython интегрирование - это один из самых эффективных методов, так как чистый С быстрее Python, но код для полной компиляции кода неидеален. Это связано с:
+            <ul>
+                <li>Несовершенный перевод кода питона на С</li>
+                <li>Разная логика у двух языков, что замедляет работу на С</li>
+            </ul>
+        </div>
+
+        <h3>3.3. Сравнение с потоками (ограниченными GIL)</h3>
+        <div class="warning-box">
+            <strong>Потоки с GIL:</strong> 0.5785 сек (всего 1.10x ускорение даже при 2 потоках)<br>
+            <strong>Процессы (аналог noGIL):</strong> 0.2418 сек (2.63x ускорение при 6 процессах)<br><br>
+            Разница в производительности в <strong>2.39 раза</strong> показывает эффективность обхода GIL.
+        </div>
     </section>
 
     <section>
-        <h2>4. Рекомендации по применению</h2>
+        <h2>4. Как применять</h2>
 
         <div class="recommendation">
-            <h3>Для максимальной производительности:</h3>
-            <p>Использовать <span class="key-point">ProcessPoolExecutor</span> с числом процессов, равным количеству ядер CPU.</p>
+            <h3>Для CPU-bound (ограничены производительностью процессора) вычислений (интегрирование):</h3>
+            <p>Использовать <span class="key-point">multiprocessing с 6 процессами</span> (аналог noGIL) для максимальной производительности.</p>
         </div>
 
         <div class="recommendation">
-            <h3>Для legacy-кода или универсальности:</h3>
-            <p>Использовать <span class="key-point">Cython</span> с универсальной версией.</p>
+            <h3>Оптимальное количество процессов:</h3>
+            <p><span class="key-point">6 процессов</span> показало наилучшее время выполнения (0.2418 сек). Большее количество не дает значительного улучшения.</p>
         </div>
 
         <div class="recommendation">
-            <h3>Для I/O-bound задач:</h3>
-            <p>Использовать <span class="key-point">ThreadPoolExecutor</span>.</p>
+            <h3>Когда использовать потоки:</h3>
+            <p>Только для <span class="key-point">I/O-bound задач (ожидание операций ввода-вывода)</span>. Для вычислений потоки ограничены GIL.</p>
         </div>
 
-        <div class="recommendation">
-            <h3>Для простых скриптов или обучения:</h3>
-            <p>Использовать <span class="key-point">базовый метод</span>.</p>
-        </div>
-
-        <h3>Ограничения и возможные улучшения:</h3>
+        <h3>Выводы по noGIL:</h3>
         <ol>
-            <li>Метод левых прямоугольников имеет погрешность O(1/n)</li>
-            <li>Можно реализовать более точные методы (трапеций, Симпсона)</li>
-            <li>Для ProcessPoolExecutor важен правильный выбор n_jobs (оптимально: количество ядер CPU)</li>
-            <li>Cython-версию можно дополнительно оптимизировать использованием SIMD-инструкций</li>
+            <li>noGIL (или его аналог multiprocessing) существенно ускоряет CPU-bound вычисления</li>
+            <li>Оптимальное ускорение достигается при 6 параллельных процессах/потоках</li>
+            <li>Дальнейшее увеличение количества процессов не эффективно из-за накладных расходов</li>
+            <li>Мультипроцессинг дает аналогичный noGIL результат без специальной сборки Python</li>
         </ol>
     </section>
 
     <section>
         <h2>5. Итоговый вывод</h2>
 
-        <p><strong>Выбор метода зависит от конкретной задачи:</strong></p>
+        <p><strong>Основные результаты исследования:</strong></p>
 
         <div class="method-card">
-            <div class="method-name">Максимальная скорость → ProcessPoolExecutor</div>
-            <p>Обеспечивает истинный параллелизм, обходит ограничения GIL, наиболее эффективен для CPU-bound задач.</p>
+            <div class="method-name">noGIL (через multiprocessing) - наиболее эффективен</div>
+            <p>Достигнуто ускорение в 2.63 раза при 6 процессах. Показывает, как могла бы работать многопоточность без GIL.</p>
         </div>
 
         <div class="method-card">
-            <div class="method-name">Баланс скорости и простоты → Cython</div>
-            <p>Значительное ускорение без сложностей параллельного программирования, сохраняет читаемость кода.</p>
+            <div class="method-name">Производительность после 6 процессов</div>
+            <p>Оптимальное количество параллельных задач для данной вычислительной нагрузки - 6. Дальнейшее увеличение не эффективно.</p>
         </div>
 
         <div class="method-card">
-            <div class="method-name">Работа с I/O → ThreadPoolExecutor</div>
-            <p>Эффективен для задач с ожиданием ввода-вывода, но не для чистых вычислений в Python.</p>
+            <div class="method-name">GIL - основное ограничение потоков Python</div>
+            <p>Потоки дают лишь 10% ускорение для CPU-bound задач, тогда как процессы (без GIL) - 163%.</p>
         </div>
 
-        <div class="method-card">
-            <div class="method-name">Простота и читаемость → базовый метод</div>
-            <p>Минимальные зависимости, понятная логика, подходит для прототипирования и обучения.</p>
-        </div>
-
-        <p>Все реализации корректны и могут использоваться в зависимости от требований проекта к производительности,
-        сложности поддержки и окружения выполнения. Для большинства вычислительных задач численного интегрирования
-        рекомендуется использовать <span class="key-point">ProcessPoolExecutor</span> как наиболее производительное решение.</p>
+        <p>Для задач численного интегрирования можно использовать <span class="key-point">multiprocessing с 6 процессами</span> как оптимальное решение, дающее максимальное ускорение при разумных накладных расходах. Это решение работает без необходимости установки специальных версий Python с NOGIL и дает сравнимую производительность, потому что noGIL подключить было сложно, а структура работы этих методов схожа.</p>
     </section>
     <script>
-        // Установка текущей даты в футере
+        // Установка текущей даты
         const now = new Date();
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('current-date').textContent = now.toLocaleDateString('ru-RU', options);
-
-        // Анимация появления столбцов диаграммы
-        document.addEventListener('DOMContentLoaded', function() {
-            const chartValues = document.querySelectorAll('.chart-value');
-            chartValues.forEach((value, index) => {
-                // Устанавливаем начальную ширину 0
-                value.style.width = '0%';
-
-                // Запускаем анимацию с задержкой
-                setTimeout(() => {
-                    const finalWidth = value.textContent.includes('1.2497') ? '100%' :
-                                      value.textContent.includes('1.0322') ? '82.6%' :
-                                      value.textContent.includes('0.9355') ? '74.9%' : '47.4%';
-                    value.style.width = finalWidth;
-                }, 300 + index * 200);
-            });
-        });
     </script>
 </body>
 </html>
