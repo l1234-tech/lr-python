@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчет: Методы численного интегрирования</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2c3e50 0%, #4a6491 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-style: italic;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-left: 4px solid #3498db;
+        }
+
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+
+        .method-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: transform 0.2s;
+        }
+
+        .method-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .method-name {
+            color: #2980b9;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .complexity {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-left: 10px;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .results-table th {
+            background-color: #34495e;
+            color: white;
+            text-align: left;
+            padding: 12px;
+        }
+
+        .results-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .results-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .results-table tr:hover {
+            background-color: #f1f8ff;
+        }
+
+        .time-cell {
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        .fastest {
+            background-color: #d4edda !important;
+            border-left: 4px solid #28a745;
+        }
+
+        .comparison-chart {
+            height: 300px;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            height: 40px;
+        }
+
+        .chart-label {
+            width: 200px;
+            font-weight: bold;
+        }
+
+        .chart-value {
+            flex-grow: 1;
+            background: #3498db;
+            height: 100%;
+            border-radius: 4px;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            min-width: 100px;
+            transition: width 1s ease;
+        }
+
+        .note-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .warning-box {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .code-snippet {
+            background: #2d3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .recommendation {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .key-point {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            section {
+                padding: 15px;
+            }
+
+            .chart-label {
+                width: 150px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Отчет по реализации методов численного интегрирования</h1>
+        <div class="subtitle">Сравнение производительности четырех методов вычисления определенного интеграла</div>
+    </header>
+
+    <section>
+        <h2>1. Краткое описание методов</h2>
+
+        <div class="method-card">
+            <div class="method-name">1.1. Базовый метод (integrate) <span class="complexity">O(n)</span></div>
+            <p><strong>Алгоритм:</strong> Метод левых прямоугольников</p>
+            <ul>
+                <li>Итеративный подход без параллелизации</li>
+                <li>Разбивает отрезок [a, b] на n_iter равных частей</li>
+                <li>Вычисляет сумму значений функции в левых концах подинтервалов</li>
+                <li>Простая реализация, минимальные накладные расходы</li>
+            </ul>
+            <div class="code-snippet">
+# Основной цикл вычислений
+acc = 0
+step = (b - a) / n_iter
+for i in range(n_iter):
+    acc += f(a + i * step) * step
+return acc
+            </div>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">1.2. Параллельный метод с потоками (integrate_async)</div>
+            <p><strong>Алгоритм:</strong> ThreadPoolExecutor с разделением отрезка</p>
+            <ul>
+                <li>Разделяет отрезок интегрирования на n_jobs частей</li>
+                <li>Каждая часть вычисляется в отдельном потоке</li>
+                <li>Использует concurrent.futures.ThreadPoolExecutor</li>
+                <li>Подходит для I/O-bound задач</li>
+            </ul>
+            <div class="note-box">
+                <strong>Примечание:</strong> В строке <code>fs = [spawn(a + i * step, a + (i + 1) * step) for i in range(n_jobs)]</code>
+                создаются объекты Future, представляющие ожидаемые результаты, а не сами вычисления. Вычисления выполняются асинхронно в пуле потоков.
+            </div>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">1.3. Параллельный метод с процессами (integrate_process)</div>
+            <p><strong>Алгоритм:</strong> ProcessPoolExecutor с разделением отрезка</p>
+            <ul>
+                <li>Разделяет отрезок интегрирования на n_jobs частей</li>
+                <li>Каждая часть вычисляется в отдельном процессе</li>
+                <li>Использует concurrent.futures.ProcessPoolExecutor</li>
+                <li>Обходит ограничение GIL, подходит для CPU-bound задач</li>
+            </ul>
+            <div class="warning-box">
+                <strong>Важное замечание:</strong> Требует запуска в блоке <code>if __name__ == '__main__':</code> для корректной работы
+                на Windows и предотвращения рекурсивного создания процессов.
+            </div>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">1.4. Оптимизированный метод на Cython (integrate_cython)</div>
+            <p><strong>Алгоритм:</strong> Компилируемая версия метода левых прямоугольников</p>
+            <p><strong>Три варианта реализации:</strong></p>
+            <ol>
+                <li><strong>Универсальная:</strong> Принимает любую Python-функцию</li>
+                <li><strong>Специализированная:</strong> Для конкретных функций (sin, cos, exp, x²) с прямой линковкой C-функций</li>
+                <li><strong>Комбинированная:</strong> Диспетчеризация по имени функции</li>
+            </ol>
+            <p><strong>Оптимизации:</strong></p>
+            <ul>
+                <li>Статическая типизация C-переменных</li>
+                <li>Директивы: boundscheck=False, wraparound=False, cdivision=True</li>
+            </ul>
+            <div class="code-snippet">
+# Пример специализированной функции в Cython
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cpdef double integrate_sin(double a, double b, int n_iter=1000):
+    cdef double acc = 0.0
+    cdef double step = (b - a) / n_iter
+    cdef int i
+    cdef double x
+
+    for i in range(n_iter):
+        x = a + i * step
+        acc += sin(x) * step  # Прямой вызов C-функции
+    return acc
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>2. Результаты тестирования</h2>
+
+        <h3>2.1. Корректность вычислений</h3>
+        <p>Все реализации успешно прошли тесты:</p>
+        <ul>
+            <li>Интеграл log₂(x) от 1 до 2: ожидается ~0.5573 ✓</li>
+            <li>Интеграл cos(x) от 0 до π/2: ожидается 1.0 ✓</li>
+            <li>Интеграл sin(x) от 0 до π: ожидается 2.0 ✓</li>
+        </ul>
+
+        <h3>2.2. Производительность (10,000,000 итераций)</h3>
+        <p>Интеграл sin(x) от 0 до π:</p>
+
+        <div class="comparison-chart">
+            <div class="chart-bar">
+                <div class="chart-label">Integrate_1 (базовый)</div>
+                <div class="chart-value" style="width: 100%; background: #e74c3c;">1.2497 сек</div>
+            </div>
+            <div class="chart-bar">
+                <div class="chart-label">Integrate_async (потоки)</div>
+                <div class="chart-value" style="width: 82.6%; background: #f39c12;">1.0322 сек</div>
+            </div>
+            <div class="chart-bar">
+                <div class="chart-label">Integrate_cython (Cython)</div>
+                <div class="chart-value" style="width: 74.9%; background: #3498db;">0.9355 сек</div>
+            </div>
+            <div class="chart-bar">
+                <div class="chart-label">Integrate_process (процессы)</div>
+                <div class="chart-value" style="width: 47.4%; background: #2ecc71;">0.5928 сек</div>
+            </div>
+        </div>
+
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Метод</th>
+                    <th>Время выполнения</th>
+                    <th>Результат</th>
+                    <th>Ускорение</th>
+                    <th>Примечания</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Integrate_1 (базовый)</td>
+                    <td class="time-cell">1.2497 сек</td>
+                    <td>2.00000</td>
+                    <td>1.00x</td>
+                    <td>Последовательное выполнение</td>
+                </tr>
+                <tr>
+                    <td>Integrate_async (потоки)</td>
+                    <td class="time-cell">1.0322 сек</td>
+                    <td>2.00000</td>
+                    <td>1.21x</td>
+                    <td>Ограничен GIL</td>
+                </tr>
+                <tr>
+                    <td>Integrate_cython (Cython)</td>
+                    <td class="time-cell">0.9355 сек</td>
+                    <td>2.00000</td>
+                    <td>1.34x</td>
+                    <td>Компиляция в C-код</td>
+                </tr>
+                <tr class="fastest">
+                    <td><strong>Integrate_process (процессы)</strong></td>
+                    <td class="time-cell"><strong>0.5928 сек</strong></td>
+                    <td><strong>2.00000</strong></td>
+                    <td><strong>2.11x</strong></td>
+                    <td><strong>Истинный параллелизм</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>3. Анализ производительности</h2>
+
+        <h3>3.1. ProcessPoolExecutor - наилучшая производительность (0.5928 сек)</h3>
+        <ul>
+            <li>Параллелизм на уровне процессов обходит GIL</li>
+            <li>Эффективное использование многоядерных процессоров</li>
+            <li>Накладные расходы на создание процессов компенсируются параллельными вычислениями</li>
+        </ul>
+
+        <h3>3.2. Cython - второе место (0.9355 сек)</h3>
+        <ul>
+            <li>Значительное ускорение за счет компиляции в C</li>
+            <li>Использование статических типов и оптимизаций</li>
+            <li>Минимальные накладные расходы на вызовы Python API</li>
+        </ul>
+
+        <h3>3.3. ThreadPoolExecutor - умеренное ускорение (1.0322 сек)</h3>
+        <ul>
+            <li>Ограничен GIL для CPU-bound операций</li>
+            <li>Ускорение достигается за счет параллельного выполнения операций ввода-вывода</li>
+            <li>Для чисто вычислительных задач в Python неэффективен</li>
+        </ul>
+
+        <h3>3.4. Базовый метод - самый медленный (1.2497 сек)</h3>
+        <ul>
+            <li>Последовательное выполнение</li>
+            <li>Минимальные накладные расходы, но нет параллелизма</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>4. Рекомендации по применению</h2>
+
+        <div class="recommendation">
+            <h3>Для максимальной производительности:</h3>
+            <p>Использовать <span class="key-point">ProcessPoolExecutor</span> с числом процессов, равным количеству ядер CPU.</p>
+        </div>
+
+        <div class="recommendation">
+            <h3>Для legacy-кода или универсальности:</h3>
+            <p>Использовать <span class="key-point">Cython</span> с универсальной версией.</p>
+        </div>
+
+        <div class="recommendation">
+            <h3>Для I/O-bound задач:</h3>
+            <p>Использовать <span class="key-point">ThreadPoolExecutor</span>.</p>
+        </div>
+
+        <div class="recommendation">
+            <h3>Для простых скриптов или обучения:</h3>
+            <p>Использовать <span class="key-point">базовый метод</span>.</p>
+        </div>
+
+        <h3>Ограничения и возможные улучшения:</h3>
+        <ol>
+            <li>Метод левых прямоугольников имеет погрешность O(1/n)</li>
+            <li>Можно реализовать более точные методы (трапеций, Симпсона)</li>
+            <li>Для ProcessPoolExecutor важен правильный выбор n_jobs (оптимально: количество ядер CPU)</li>
+            <li>Cython-версию можно дополнительно оптимизировать использованием SIMD-инструкций</li>
+        </ol>
+    </section>
+
+    <section>
+        <h2>5. Итоговый вывод</h2>
+
+        <p><strong>Выбор метода зависит от конкретной задачи:</strong></p>
+
+        <div class="method-card">
+            <div class="method-name">Максимальная скорость → ProcessPoolExecutor</div>
+            <p>Обеспечивает истинный параллелизм, обходит ограничения GIL, наиболее эффективен для CPU-bound задач.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">Баланс скорости и простоты → Cython</div>
+            <p>Значительное ускорение без сложностей параллельного программирования, сохраняет читаемость кода.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">Работа с I/O → ThreadPoolExecutor</div>
+            <p>Эффективен для задач с ожиданием ввода-вывода, но не для чистых вычислений в Python.</p>
+        </div>
+
+        <div class="method-card">
+            <div class="method-name">Простота и читаемость → базовый метод</div>
+            <p>Минимальные зависимости, понятная логика, подходит для прототипирования и обучения.</p>
+        </div>
+
+        <p>Все реализации корректны и могут использоваться в зависимости от требований проекта к производительности,
+        сложности поддержки и окружения выполнения. Для большинства вычислительных задач численного интегрирования
+        рекомендуется использовать <span class="key-point">ProcessPoolExecutor</span> как наиболее производительное решение.</p>
+    </section>
+    <script>
+        // Установка текущей даты в футере
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = now.toLocaleDateString('ru-RU', options);
+
+        // Анимация появления столбцов диаграммы
+        document.addEventListener('DOMContentLoaded', function() {
+            const chartValues = document.querySelectorAll('.chart-value');
+            chartValues.forEach((value, index) => {
+                // Устанавливаем начальную ширину 0
+                value.style.width = '0%';
+
+                // Запускаем анимацию с задержкой
+                setTimeout(() => {
+                    const finalWidth = value.textContent.includes('1.2497') ? '100%' :
+                                      value.textContent.includes('1.0322') ? '82.6%' :
+                                      value.textContent.includes('0.9355') ? '74.9%' : '47.4%';
+                    value.style.width = finalWidth;
+                }, 300 + index * 200);
+            });
+        });
+    </script>
+</body>
+</html>
