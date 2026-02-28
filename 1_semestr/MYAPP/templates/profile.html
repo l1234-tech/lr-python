@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Профиль пользователя</h1>
+
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
+        <p><strong>ID:</strong> {{ user.id }}</p>
+        <p><strong>Имя:</strong> {{ user.name }}</p>
+        <p><strong>Всего подписок:</strong> {{ user_currencies|length }}</p>
+    </div>
+
+    <h2>Мои валюты</h2>
+    {% if user_currencies %}
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Код</th>
+                <th>Название</th>
+                <th>Курс</th>
+                <th>Изменение</th>
+                <th>Действия</th>
+            </tr>
+            {% for currency in user_currencies %}
+                {% set current_value = currency.value|default(0) %}
+                {% set previous_value = currency.previous|default(current_value * 0.95) %}
+                {% set change = ((current_value - previous_value) / previous_value * 100) if previous_value != 0 else 0 %}
+                <tr>
+                    <td>{{ currency.id }}</td>
+                    <td><strong>{{ currency.char_code }}</strong></td>
+                    <td>{{ currency.name }}</td>
+                    <td>{{ "%.4f"|format(current_value) }} ₽</td>
+                    <td class="{{ 'up' if change > 0 else 'down' if change < 0 else '' }}">
+                        {% if change > 0 %}+{% endif %}{{ "%.2f"|format(change) }}%
+                    </td>
+                    <td>
+                        <form action="/user/subscribe" method="POST" style="display: inline;">
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <input type="hidden" name="currency_id" value="{{ currency.id }}">
+                            <input type="hidden" name="action" value="unsubscribe">
+                            <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Отписаться от {{ currency.char_code }}?')">
+                                Отписаться
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p>У вас нет подписок на валюты.</p>
+        </div>
+    {% endif %}
+
+    <h2>Добавить валюту</h2>
+{% if all_currencies %}
+    <p>Все доступные валюты: <strong>{{ all_currencies|length }}</strong></p>
+
+    <form action="/user/subscribe" method="POST" onsubmit="return validateCurrencySelection()">
+        <div class="form-group">
+            <label for="currency_select">Выберите валюту для подписки:</label>
+            <select id="currency_select" name="currency_id" required
+                    style="width: 100%; padding: 10px; margin: 10px 0; font-size: 14px;">
+                <option value="">-- Выберите валюту --</option>
+                {% for currency in all_currencies %}
+                    {% if not currency.is_subscribed %}
+                        <option value="{{ currency.id }}" data-subscribed="false">
+                             {{ currency.char_code }} - {{ currency.name }}
+                            ({{ "%.2f"|format(currency.value) }} ₽ за {{ currency.nominal }} ед.)
+                        </option>
+                    {% else %}
+                        <option value="{{ currency.id }}" disabled style="color: #999;" data-subscribed="true">
+                             {{ currency.char_code }} - {{ currency.name }}
+                            ({{ "%.2f"|format(currency.value) }} ₽ за {{ currency.nominal }} ед.) - УЖЕ ПОДПИСАН
+                        </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <input type="hidden" name="user_id" value="{{ user.id }}">
+            <input type="hidden" name="action" value="subscribe">
+            <button type="submit" class="btn" id="subscribe_btn">Подписаться на выбранную валюту</button>
+        </div>
+    </form>
+
+    <div style="background: #f0f8ff; padding: 15px; border-radius: 5px; margin-top: 15px;">
+        <h4>Статус валют:</h4>
+        <ul style="margin: 0; padding-left: 20px;">
+            <li><span style="color: #28a745;"></span> - Доступна для подписки</li>
+            <li><span style="color: #ffc107;"></span> - Уже подписаны</li>
+        </ul>
+    </div>
+{% else %}
+    <div style="background: #f8d7da; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <p>Нет доступных валют в системе.</p>
+        <p>Пожалуйста, перезапустите сервер для инициализации данных.</p>
+    </div>
+{% endif %}
+
+<script>
+function validateCurrencySelection() {
+    const select = document.getElementById('currency_select');
+    const selectedOption = select.options[select.selectedIndex];
+
+    if (!select.value) {
+        alert('Пожалуйста, выберите валюту!');
+        return false;
+    }
+
+    const isSubscribed = selectedOption.getAttribute('data-subscribed') === 'true';
+    if (isSubscribed) {
+        alert('Вы уже подписаны на эту валюту!');
+        return false;
+    }
+
+    const currencyName = selectedOption.text.split(' - ')[1]?.split(' (')[0] || 'эту валюту';
+    return confirm(`Вы уверены, что хотите подписаться на ${currencyName}?`);
+}
+
+document.getElementById('currency_select').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const isSubscribed = selectedOption.getAttribute('data-subscribed') === 'true';
+    const btn = document.getElementById('subscribe_btn');
+
+    if (isSubscribed) {
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+        btn.style.cursor = 'not-allowed';
+        btn.title = 'Вы уже подписаны на эту валюту';
+    } else {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.title = '';
+    }
+});
+</script>
+
+    <div style="margin-top: 30px;">
+        <a href="/" class="btn">На главную</a>
+        <a href="/debug/db" class="btn" style="background: #6c757d;">Отладка БД</a>
+        <a href="/currencies" class="btn">Все валюты</a>
+    </div>
+<div style="margin-top: 20px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9em;">
+    <h4>Отладочная информация:</h4>
+    <ul>
+        <li>Пользователь ID: {{ user.id }}</li>
+        <li>Подписок: {{ user_currencies|length }}</li>
+        <li>Доступно для подписки: {{ all_currencies|length }}</li>
+        <li>Время: <span id="current-time"></span></li>
+    </ul>
+    <button onclick="location.reload(true)" class="btn" style="padding: 5px 10px; font-size: 0.8em;">
+         Принудительно обновить
+    </button>
+</div>
+
+<script>
+    document.getElementById('current-time').textContent = new Date().toLocaleTimeString();
+
+    setTimeout(function() {
+        location.reload();
+    }, 5000);
+</script>
+{% endblock %}

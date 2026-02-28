@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Пользователи системы</span>
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    Добавить пользователя
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Имя</th>
+                                <th>Подписки</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.name }}</td>
+                                <td>
+                                    {% if user.subscriptions and user.subscriptions|length > 0 %}
+                                        {% for sub in user.subscriptions %}
+                                        <span class="badge bg-primary me-1 mb-1">{{ sub }}</span>
+                                        {% endfor %}
+                                        <small class="text-muted">({{ user.subscriptions|length }})</small>
+                                    {% else %}
+                                        <span class="text-muted">Нет подписок</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="/user?id={{ user.id }}" class="btn btn-outline-primary btn-sm">Просмотр</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                Статистика
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="border rounded p-3">
+                            <h3>{{ users|length }}</h3>
+                            <p class="text-muted mb-0">Всего пользователей</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3">
+                            <h3>{{ total_subscriptions }}</h3>
+                            <p class="text-muted mb-0">Всего подписок</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3">
+                            <h3>{{ avg_subscriptions }}</h3>
+                            <p class="text-muted mb-0">Среднее на пользователя</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-3">
+                            <h3>{{ most_popular_currency }}</h3>
+                            <p class="text-muted mb-0">Популярная валюта</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить нового пользователя</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="/users/add">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="userName" class="form-label">Имя пользователя</label>
+                        <input type="text" class="form-control" id="userName" name="name" required
+                               placeholder="Введите имя">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addUserForm = document.querySelector('form[action="/users/add"]');
+        if (addUserForm) {
+            addUserForm.addEventListener('submit', function(e) {
+                const nameInput = document.getElementById('userName');
+                if (!nameInput.value.trim()) {
+                    e.preventDefault();
+                    alert('Введите имя пользователя');
+                    nameInput.focus();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

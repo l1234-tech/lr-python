@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                Профиль пользователя
+            </div>
+            <div class="card-body">
+                <h4>{{ user.name }}</h4>
+                <p class="text-muted">ID: {{ user.id }}</p>
+                <p class="text-muted">Подписок: {{ user.subscriptions|length }}</p>
+
+                <h5 class="mt-4">Мои подписки</h5>
+                <div id="subscriptionsList" class="mb-3">
+                    {% if user.subscriptions %}
+                        {% for currency_code in user.subscriptions %}
+                            {% if currencies_data and currency_code in currencies_data %}
+                            {% set currency = currencies_data[currency_code] %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                                <div>
+                                    <strong>{{ currency_code }}</strong><br>
+                                    <small class="text-muted">
+                                        {% if currency.name %}
+                                            {{ currency.name }}
+                                        {% else %}
+                                            Валюта {{ currency_code }}
+                                        {% endif %}
+                                    </small><br>
+                                    <small>Курс:
+                                        {% if currency.price %}
+                                            {{ "%.4f"|format(currency.price) }} руб.
+                                        {% else %}
+                                            нет данных
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <form method="POST" action="/user/subscription" style="display: inline;">
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                                    <input type="hidden" name="currency_code" value="{{ currency_code }}">
+                                    <input type="hidden" name="action" value="unsubscribe">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('Отписаться от {{ currency_code }}?')">
+                                        Отписаться
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded bg-warning">
+                                <div>
+                                    <strong>{{ currency_code }}</strong><br>
+                                    <small class="text-muted">(нет данных)</small>
+                                </div>
+                                <form method="POST" action="/user/subscription" style="display: inline;">
+                                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                                    <input type="hidden" name="currency_code" value="{{ currency_code }}">
+                                    <input type="hidden" name="action" value="unsubscribe">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        Отписаться
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <p class="mb-0">Нет активных подписок</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                Добавить подписку
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/user/subscription" id="addSubscriptionForm">
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <input type="hidden" name="action" value="subscribe">
+
+                    <div class="mb-3">
+                        <label for="currencySelect" class="form-label">Выберите валюту</label>
+                        <select class="form-select" id="currencySelect" name="currency_code" required>
+                            <option value="">-- Выберите валюту --</option>
+                            {% if available_currencies %}
+                                {% for currency_code in available_currencies %}
+                                    {% if currency_code and currency_code not in user.subscriptions %}
+                                    <option value="{{ currency_code }}">{{ currency_code }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="JPY">JPY</option>
+                                <option value="CNY">CNY</option>
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100" id="subscribeBtn">Подписаться</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                Графики изменения курсов
+            </div>
+            <div class="card-body">
+                {% if user.subscriptions and user.subscriptions|length > 0 %}
+                    {% set has_graphs = false %}
+                    {% for currency_code in user.subscriptions %}
+                        {% if history and currency_code in history and history[currency_code] and history[currency_code]|length > 0 %}
+                            {% set has_graphs = true %}
+                            <div class="mb-4">
+                                <h5>{{ currency_code }} - История курса за 30 дней</h5>
+                                <div id="graph{{ currency_code }}" style="height: 250px;"></div>
+                                <small class="text-muted">
+                                    Последнее значение:
+                                    {% if currencies_data and currency_code in currencies_data and currencies_data[currency_code].price %}
+                                        {{ "%.4f"|format(currencies_data[currency_code].price) }} руб.
+                                    {% else %}
+                                        Нет данных
+                                    {% endif %}
+                                </small>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        <p class="mb-0">У вас нет активных подписок на валюты.</p>
+                        <small>Добавьте подписки в левой панели, чтобы видеть графики изменений</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                Текущие курсы подписанных валют
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Код</th>
+                                <th>Название</th>
+                                <th>Курс (руб.)</th>
+                                <th>Предыдущий</th>
+                                <th>Изменение</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if user.subscriptions and user.subscriptions|length > 0 %}
+                                {% for currency_code in user.subscriptions %}
+                                    {% if currencies_data and currency_code in currencies_data %}
+                                    {% set currency = currencies_data[currency_code] %}
+                                    {% set change = currency.price - currency.previous %}
+                                    <tr>
+                                        <td><strong>{{ currency_code }}</strong></td>
+                                        <td>
+                                            {% if currency.name %}
+                                                {{ currency.name }}
+                                            {% else %}
+                                                Валюта {{ currency_code }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if currency.price %}
+                                                {{ "%.4f"|format(currency.price) }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if currency.previous %}
+                                                {{ "%.4f"|format(currency.previous) }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if change > 0 %}
+                                                <span class="change-positive">+{{ "%.4f"|format(change) }}</span>
+                                            {% elif change < 0 %}
+                                                <span class="change-negative">{{ "%.4f"|format(change) }}</span>
+                                            {% else %}
+                                                <span class="text-muted">0.0000</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr class="table-warning">
+                                        <td><strong>{{ currency_code }}</strong></td>
+                                        <td>Данные не найдены</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">У вас нет активных подписок</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if history and user.subscriptions %}
+            {% for currency_code in user.subscriptions %}
+                {% if history[currency_code] %}
+                (function() {
+                    try {
+                        const currencyData = {{ history[currency_code]|tojson }};
+                        if (currencyData && currencyData.length > 0) {
+                            currencyData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                            const dates = currencyData.map(item => item.date);
+                            const values = currencyData.map(item => parseFloat(item.value));
+
+                            const trace = {
+                                x: dates,
+                                y: values,
+                                type: 'scatter',
+                                mode: 'lines+markers',
+                                name: '{{ currency_code }}',
+                                line: { color: '#3498db', width: 2 },
+                                marker: { size: 4 }
+                            };
+
+                            const layout = {
+                                title: '',
+                                xaxis: {
+                                    title: 'Дата',
+                                    tickformat: '%d.%m.%Y',
+                                    tickangle: 45
+                                },
+                                yaxis: { title: 'Курс (руб.)' },
+                                showlegend: false,
+                                margin: { t: 10, r: 40, b: 60, l: 60 },
+                                hovermode: 'closest'
+                            };
+
+                            Plotly.newPlot('graph{{ currency_code }}', [trace], layout);
+                        }
+                    } catch (error) {
+                        console.error('Ошибка построения графика для {{ currency_code }}:', error);
+                        document.getElementById('graph{{ currency_code }}').innerHTML =
+                            '<div class="alert alert-danger">Ошибка построения графика</div>';
+                    }
+                })();
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        const addSubscriptionForm = document.getElementById('addSubscriptionForm');
+        if (addSubscriptionForm) {
+            addSubscriptionForm.addEventListener('submit', function(e) {
+                const select = document.getElementById('currencySelect');
+                const currencyCode = select ? select.value : null;
+
+                if (!currencyCode) {
+                    e.preventDefault();
+                    alert('Пожалуйста, выберите валюту');
+                    return;
+                }
+
+                if (!confirm(`Подписаться на валюту ${currencyCode}?`)) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        document.querySelectorAll('form[action="/user/subscription"]').forEach(form => {
+            if (form.querySelector('input[name="action"]').value === 'unsubscribe') {
+                form.addEventListener('submit', function(e) {
+                    const currencyCode = this.querySelector('input[name="currency_code"]').value;
+                    if (!confirm(`Отписаться от валюты ${currencyCode}?`)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+
+        setTimeout(function() {
+            location.reload();
+        }, 60000);
+    });
+</script>
+{% endblock %}

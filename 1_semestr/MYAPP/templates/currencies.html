@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Курсы валют</span>
+                <form method="POST" action="/currencies/update" style="display: inline;">
+                    <button type="submit" class="btn btn-primary btn-sm">Обновить курсы</button>
+                </form>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Код</th>
+                                <th>Название</th>
+                                <th>Курс (руб.)</th>
+                                <th>Предыдущий курс</th>
+                                <th>Изменение</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for currency in currencies %}
+                            {% set change = currency.price - currency.previous %}
+                            <tr>
+                                <td><strong>{{ currency.name_curr }}</strong></td>
+                                <td>{{ currency.name }}</td>
+                                <td>{{ "%.4f"|format(currency.price) }}</td>
+                                <td>{{ "%.4f"|format(currency.previous) }}</td>
+                                <td>
+                                    {% if change > 0 %}
+                                        <span class="change-positive">+{{ "%.4f"|format(change) }}</span>
+                                    {% elif change < 0 %}
+                                        <span class="change-negative">{{ "%.4f"|format(change) }}</span>
+                                    {% else %}
+                                        <span class="text-muted">0.0000</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if currency.name_curr in selected_currencies %}
+                                    <form method="POST" action="/currencies/remove" style="display: inline;">
+                                        <input type="hidden" name="currency_code" value="{{ currency.name_curr }}">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                onclick="return confirm('Удалить {{ currency.name_curr }} из отслеживаемых?')">
+                                            Удалить
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <form method="POST" action="/currencies/add" style="display: inline;">
+                                        <input type="hidden" name="currency_code" value="{{ currency.name_curr }}">
+                                        <button type="submit" class="btn btn-outline-success btn-sm">
+                                            Добавить
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Выбор валют для отслеживания
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/currencies/select">
+                    <div class="mb-3">
+                        <button type="button" class="btn btn-outline-secondary btn-sm mb-2" id="selectAllBtn">
+                            Выбрать все
+                        </button>
+                        <div style="max-height: 300px; overflow-y: auto;" class="border p-3 rounded">
+                            {% for currency_code in available_currencies %}
+                            <div class="form-check mb-2">
+                                <input class="form-check-input currency-checkbox" type="checkbox"
+                                       name="currencies" value="{{ currency_code }}"
+                                       id="curr{{ currency_code }}"
+                                       {% if currency_code in selected_currencies %}checked{% endif %}>
+                                <label class="form-check-label" for="curr{{ currency_code }}">
+                                    {{ currency_code }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Сохранить выбранные валюты</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                Статистика и информация
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <p><strong>Отслеживаемые валюты:</strong> {{ selected_currencies|length }}</p>
+                    <div>
+                        {% for currency_code in selected_currencies %}
+                        <span class="badge bg-primary me-1 mb-1">{{ currency_code }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="border-top pt-3">
+                    <p><strong>Информация о данных:</strong></p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check-circle text-success"></i> Всего валют: {{ currencies|length }}</li>
+                        <li><i class="bi bi-eye text-primary"></i> Отслеживается: {{ selected_currencies|length }}</li>
+                        <li><i class="bi bi-clock text-warning"></i> Обновление: ежедневное</li>
+                        <li><i class="bi bi-database text-info"></i> Источник: ЦБ РФ API</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAllBtn = document.getElementById('selectAllBtn');
+        const checkboxes = document.querySelectorAll('.currency-checkbox');
+
+        if (selectAllBtn && checkboxes.length > 0) {
+            selectAllBtn.addEventListener('click', function() {
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                checkboxes.forEach(cb => {
+                    cb.checked = !allChecked;
+                });
+                selectAllBtn.textContent = allChecked ? 'Выбрать все' : 'Снять все';
+            });
+        }
+
+        document.querySelectorAll('form[action="/currencies/remove"]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const currencyCode = this.querySelector('input[name="currency_code"]').value;
+                if (!confirm(`Удалить ${currencyCode} из отслеживаемых валют?`)) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        document.querySelectorAll('form[action="/currencies/add"]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const currencyCode = this.querySelector('input[name="currency_code"]').value;
+                if (!confirm(`Добавить ${currencyCode} в отслеживаемые валюты?`)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
