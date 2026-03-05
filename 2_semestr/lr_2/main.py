@@ -10,63 +10,71 @@ import seaborn as sns
 
 def create_vector():
     """
-    Создать массив от 0 до 9.
+    Создать одномерный массив целых чисел от 0 до 9 включительно.
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.arange.html
-    
     Returns:
-        numpy.ndarray: Массив чисел от 0 до 9 включительно
+        numpy.ndarray: Массив чисел от 0 до 9 включительно.
+
+    Examples
+    --------
+    >>> v = create_vector()
+    >>> v.shape
+    (10,)
+    >>> v[0], v[-1]
+    (0, 9)
     """
-    # Подсказка: используйте np.arange(10)
 
     return np.arange(10)
 
 def create_matrix():
     """
-    Создать матрицу 5x5 со случайными числами [0,1].
+    Создать матрицу 5×5 со случайными числами из равномерного распределения [0, 1).
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/random/generated/numpy.random.rand.html
-    
     Returns:
         numpy.ndarray: Матрица 5x5 со случайными значениями от 0 до 1
     """
-    # Подсказка: используйте np.random.rand(5,5)
     return np.random.rand(5,5)
 
 def reshape_vector(vec):
     """
-    Преобразовать (10,) -> (2,5)
+     Изменить форму одномерного массива из (10,) в двумерный (2, 5).
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.reshape.html
-    
     Args:
         vec (numpy.ndarray): Входной массив формы (10,)
-    
+
     Returns:
         numpy.ndarray: Преобразованный массив формы (2, 5)
+
+    Raises
+    ------
+    ValueError
+        Если входной массив не может быть преобразован в форму (2, 5).
+
+    Examples
+    --------
+    >>> v = np.arange(10)
+    >>> reshape_vector(v).shape
+    (2, 5)
     """
-    # Подсказка: используйте vec.reshape(2,5)
-    vec = np.arange(10)
     return vec.reshape(2,5)
 
 def transpose_matrix(mat):
     """
-    Транспонирование матрицы.
+    Выполнить транспонирование матрицы (замена строк на столбцы).
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.transpose.html
-    
     Args:
         mat (numpy.ndarray): Входная матрица
-    
+
     Returns:
         numpy.ndarray: Транспонированная матрица
+
+    Examples
+    --------
+    >>> m = np.array([[1, 2], [3, 4]])
+    >>> transpose_matrix(m)
+    array([[1, 3],
+           [2, 4]])
     """
-    # Подсказка: используйте mat.T или np.transpose(mat)
-    mat = np.random.rand(5,5)
     return mat.T
 
 # ============================================================
@@ -75,62 +83,75 @@ def transpose_matrix(mat):
 
 def vector_add(a, b):
     """
-    Сложение векторов одинаковой длины.
-    (Векторизация без циклов)
-    
+    Выполнить поэлементное сложение двух векторов одинаковой длины.
+
     Args:
         a (numpy.ndarray): Первый вектор
         b (numpy.ndarray): Второй вектор
-    
+
     Returns:
         numpy.ndarray: Результат поэлементного сложения
+
+    Raises
+    ------
+    ValueError
+        Если формы массивов a и b не совпадают.
+
+    Examples
+    --------
+    >>> vector_add(np.array([1, 2]), np.array([3, 4]))
+    array([4, 6])
     """
-    # Подсказка: используйте оператор +
     return a + b
 
 def scalar_multiply(vec, scalar):
     """
-    Умножение вектора на число.
-    
+    Умножить вектор на скалярное значение.
+
     Args:
         vec (numpy.ndarray): Входной вектор
         scalar (float/int): Число для умножения
-    
+
     Returns:
         numpy.ndarray: Результат умножения вектора на скаляр
+
+    Examples
+    --------
+    >>> scalar_multiply(np.array([1, 2, 3]), 2)
+    array([2, 4, 6])
     """
-    # Подсказка: используйте оператор *
+
     return vec * scalar
 
 def elementwise_multiply(a, b):
     """
-    Поэлементное умножение.
-    
+    Выполнить поэлементное умножение двух массивов.
+
     Args:
         a (numpy.ndarray): Первый вектор/матрица
         b (numpy.ndarray): Второй вектор/матрица
-    
+
     Returns:
         numpy.ndarray: Результат поэлементного умножения
     """
-    # Подсказка: используйте оператор *
     return a * b
 
 def dot_product(a, b):
     """
-    Скалярное произведение.
+    Вычислить скалярное произведение двух векторов.
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.dot.html
-    
     Args:
         a (numpy.ndarray): Первый вектор
         b (numpy.ndarray): Второй вектор
-    
+
     Returns:
         float: Скалярное произведение векторов
+
+    Examples
+    --------
+    >>> dot_product(np.array([1, 2, 3]), np.array([4, 5, 6]))
+    32
     """
-    # Подсказка: используйте np.dot(a, b)
     return np.dot(a, b)
 
 # ============================================================
@@ -139,68 +160,94 @@ def dot_product(a, b):
 
 def matrix_multiply(a, b):
     """
-    Умножение матриц.
+    Выполнить матричное умножение двух массивов.
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.matmul.html
-    
     Args:
         a (numpy.ndarray): Первая матрица
         b (numpy.ndarray): Вторая матрица
-    
+
     Returns:
         numpy.ndarray: Результат умножения матриц
+
+    Raises
+    ------
+    ValueError
+        Если количество столбцов a не равно количеству строк b.
+
+    Examples
+    --------
+    >>> A = np.array([[1, 2], [3, 4]])
+    >>> B = np.array([[2, 0], [1, 2]])
+    >>> matrix_multiply(A, B)
+    array([[ 4,  4],
+           [10,  8]])
     """
-    # Подсказка: используйте a @ b или np.matmul(a, b)
     return a @ b
 
 def matrix_determinant(a):
     """
-    Определитель матрицы.
+    Вычислить определитель (детерминант) квадратной матрицы (вычисляется только для квадратной матрицы).
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.linalg.det.html
-    
     Args:
         a (numpy.ndarray): Квадратная матрица
-    
+
     Returns:
         float: Определитель матрицы
+
+    Raises
+    ------
+    np.linalg.LinAlgError
+        Если матрица не является квадратной.
+
+    Examples
+    --------
+    >>> A = np.array([[1, 2], [3, 4]])
+    >>> round(matrix_determinant(A), 5)
+    -2.0
     """
-    # Подсказка: используйте np.linalg.det(a)
     return np.linalg.det(a)
 
 def matrix_inverse(a):
     """
-    Обратная матрица.
+    Вычислить обратную матрицу для квадратной матрицы.
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.linalg.inv.html
-    
     Args:
         a (numpy.ndarray): Квадратная матрица
-    
+
     Returns:
         numpy.ndarray: Обратная матрица
+
+    Raises
+    ------
+    np.linalg.LinAlgError
+        Если матрица вырождена (определитель равен нулю) или не квадратная.
     """
-    # Подсказка: используйте np.linalg.inv(a)
     return np.linalg.inv(a)
 
 def solve_linear_system(a, b):
     """
-    Решить систему Ax = b
+    Решить систему линейных уравнений Ax = b методом наименьших квадратов.
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html
-    
     Args:
         a (numpy.ndarray): Матрица коэффициентов A
         b (numpy.ndarray): Вектор свободных членов b
-    
+
     Returns:
         numpy.ndarray: Решение системы x
+
+    Raises
+    ------
+    np.linalg.LinAlgError
+        Если система не имеет решения или матрица `a` вырождена.
+
+    Examples
+    --------
+    >>> A = np.array([[2, 1], [1, 3]])
+    >>> b = np.array([1, 2])
+    >>> x = solve_linear_system(A, b)
+    >>> np.allclose(A @ x, b)
+    True
     """
-    # Подсказка: используйте np.linalg.solve(a, b)
     return np.linalg.solve(a, b)
 
 # ============================================================
@@ -209,42 +256,59 @@ def solve_linear_system(a, b):
 
 def load_dataset(path="data/students_scores.csv"):
     """
-    Загрузить CSV и вернуть NumPy массив.
-    
+    Загрузить данные из CSV-файла и преобразовать в NumPy-массив.
+
     Args:
         path (str): Путь к CSV файлу
-    
+
     Returns:
         numpy.ndarray: Загруженные данные в виде массива
+
+    Raises
+    ------
+    FileNotFoundError
+        Если файл по указанному пути не найден.
+    pd.errors.EmptyDataError
+        Если файл пуст или не содержит данных.
+
+    Examples
+    --------
+    >>> data = load_dataset('data/sample.csv')
+    >>> data.shape
+    (10, 3)
     """
-    # Подсказка: используйте pd.read_csv(path).to_numpy()
     return pd.read_csv(path).to_numpy()
 
 def statistical_analysis(data):
     """
-    Представьте, что данные — это результаты экзамена по математике.
-    Нужно оценить:
-    - средний балл
-    - медиану
-    - стандартное отклонение
-    - минимум
-    - максимум
-    - 25 и 75 перцентили
+    Выполнить базовый статистический анализ одномерного массива данных.
 
-    Изучить:
-    https://numpy.org/doc/stable/reference/generated/numpy.mean.html
-    https://numpy.org/doc/stable/reference/generated/numpy.median.html
-    https://numpy.org/doc/stable/reference/generated/numpy.std.html
-    https://numpy.org/doc/stable/reference/generated/numpy.percentile.html
-    
+    Вычисляет следующие метрики:
+    - среднее значение (mean);
+    - медиана (median);
+    - стандартное отклонение (std);
+    - минимум и максимум;
+    - 25-й и 75-й перцентили.
+
     Args:
         data (numpy.ndarray): Одномерный массив данных
-    
+
     Returns:
         dict: Словарь со статистическими показателями
+
+    --------
+    numpy.mean : Среднее арифметическое.
+    numpy.median : Медиана.
+    numpy.std : Стандартное отклонение.
+    numpy.percentile : Перцентили распределения.
+
+    Examples
+    --------
+    >>> data = np.array([10, 20, 30, 40, 50])
+    >>> stats = statistical_analysis(data)
+    >>> stats['mean']
+    30.0
     """
-    # Подсказка: используйте np.mean(), np.median(), np.std(), 
-    # np.min(), np.max(), np.percentile(data, 25), np.percentile(data, 75)
     return {
         "mean": np.mean(data),           
         "median": np.median(data),       
@@ -255,23 +319,57 @@ def statistical_analysis(data):
         "75%": np.percentile(data, 75)   
     }
 
+def normalize_data(data: np.ndarray) -> np.ndarray:
+    """
+    Выполнить Min-Max нормализацию данных к диапазону [0, 1].
+
+    Формула нормализации:
+        x_norm = (x - min) / (max - min)
+
+    Args:
+        data (numpy.ndarray): Входной массив данных
+
+    Returns:
+        numpy.ndarray: Нормализованный массив данных в диапазоне [0, 1]
+
+    Raises
+    ------
+    ValueError
+        Если max == min (все элементы одинаковы).
+
+    Examples
+    --------
+    >>> data = np.array([0, 5, 10])
+    >>> normalize_data(data)
+    array([0. , 0.5, 1. ])
+    """
+    min_val = np.min(data)
+    max_val = np.max(data)
+
+    return (data - min_val) / (max_val - min_val)
+
+
 # ============================================================
 # 5. ВИЗУАЛИЗАЦИЯ
 # ============================================================
 
 def plot_histogram(data):
     """
-    Построить гистограмму распределения оценок по математике.
+    Построить и сохранить гистограмму распределения данных.
 
-    Изучить:
-    https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html
-    
     Args:
-        data (numpy.ndarray): Данные для гистограммы
-    """
-    # Подсказка: используйте plt.hist(), добавьте заголовок, подписи осей,
-    # сохраните в папку plots с помощью plt.savefig()
+    ----------
+    data : np.ndarray
+        Одномерный массив данных для визуализации.
+    bins : int, optional
+        Количество интервалов гистограммы (по умолчанию 10).
+    output_path : str, optional
+        Путь для сохранения изображения (по умолчанию "plots/histogram.png").
 
+    Returns
+    -------
+    None
+    """
     plt.hist(data, bins=10, edgecolor='black', alpha=0.7)
     plt.title('Распределение оценок по математике')
     plt.xlabel('Оценка')
@@ -280,15 +378,19 @@ def plot_histogram(data):
 
 def plot_heatmap(matrix):
     """
-    Построить тепловую карту корреляции предметов.
+    Построить и сохранить тепловую карту (heatmap) матрицы данных.
 
-    Изучить:
-    https://seaborn.pydata.org/generated/seaborn.heatmap.html
-    
     Args:
-        matrix (numpy.ndarray): Матрица корреляции
+    ----------
+    matrix : np.ndarray
+        Двумерная матрица для визуализации (например, корреляционная).
+    output_path : str, optional
+        Путь для сохранения изображения (по умолчанию "plots/heatmap.png").
+
+    Returns
+    -------
+    None
     """
-    # Подсказка: используйте sns.heatmap(), добавьте заголовок, сохраните
     
     plt.figure(figsize=(10, 8))
     
@@ -298,7 +400,7 @@ def plot_heatmap(matrix):
         fmt='.2f',            
         cmap='coolwarm',      
         center=0,             
-        square=True,          
+        square=False,          
         linewidths=0.5,       
         cbar_kws={'label': 'Корреляция'}  
     )
@@ -314,20 +416,43 @@ def plot_heatmap(matrix):
 
 def plot_line(x, y):
     """
-    Построить график зависимости: студент -> оценка по математике.
+    Построить и сохранить линейный график зависимости y от x.
 
-    Изучить:
-    https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html
-    
     Args:
-        x (numpy.ndarray): Номера студентов
-        y (numpy.ndarray): Оценки студентов
+    ----------
+    x : np.ndarray
+        Массив значений по оси X (независимая переменная).
+    y : np.ndarray
+        Массив значений по оси Y (зависимая переменная).
+    output_path : str, optional
+        Путь для сохранения изображения (по умолчанию "plots/line_plot.png").
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    ValueError
+        Если длины массивов x и y не совпадают.
+
+    Examples
+    --------
+    >>> x = np.arange(1, 11)
+    >>> y = np.random.randint(60, 100, size=10)
+    >>> plot_line(x, y)
     """
-    # Подсказка: используйте plt.plot(), добавьте заголовок, подписи осей,
-    # сохраните график
-    
-    
-
-df = pd.read_csv('data/students_scores.csv')
-
-print(plot_histogram(df))
+    plt.figure(figsize=(12, 6))
+    plt.plot(
+        x, y,
+        marker='o',              # Точки на графике
+        linestyle='-',           # Сплошная линия
+        linewidth=2,             # Толщина линии
+        markersize=6,            # Размер маркеров
+        markeredgewidth=1.5,        # Толщина края
+        label='Оценка по математике'
+    )
+    plt.title('Зависимость оценки по математике от номера студента', fontsize=16, pad=20)
+    plt.xlabel('Номер студента', fontsize=12)
+    plt.ylabel('Оценка', fontsize=12)
+    plt.savefig('plots/line_plot.png', dpi=300, bbox_inches='tight')
